@@ -1,0 +1,41 @@
+# Jellystat - Jellyfin Statistics and Monitoring
+
+services:
+  jellystat:
+    image: ${JELLYSTAT_IMAGE}:${JELLYSTAT_TAG}
+    env_file:
+      - ../.env.defaults
+      - ../.env.local
+    container_name: jellystat
+    networks:
+      mediacenter:
+        ipv4_address: 172.30.0.19
+    environment:
+      - PUID=${JELLYSTAT_UID}
+      - PGID=${MEDIACENTER_GID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/config/jellystat-config:/config
+    ports:
+      - ${JELLYSTAT_PORT}:3000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: local
+      options:
+        max-file: '3'
+        max-size: 10m
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellystat.rule=Host(`${JELLYSTAT_TRAEFIK_NAME}.${DOMAIN_NAME}`)
+      - traefik.http.routers.jellystat.entrypoints=web
+      - traefik.http.services.jellystat.loadbalancer.server.port=3000
+    depends_on:
+      jellyfin:
+        condition: service_healthy
+        restart: true

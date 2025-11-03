@@ -100,12 +100,12 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
     done
     echo ""
 
-    # Ask for Plex claim token (optional)
-    echo "Plex Claim Token (Optional)"
-    echo "---------------------------"
-    echo "Get claim token from: https://www.plex.tv/claim/"
-    echo "NOTE: Claim tokens expire in 4 minutes. Leave empty to configure later."
-    read -p "Enter Plex claim token [press Enter to skip]: " PLEX_CLAIM
+    # Note: Jellyfin does not require claim tokens like Plex
+    # Authentication is configured during first-time setup via web UI
+    echo "Jellyfin Configuration"
+    echo "----------------------"
+    echo "Jellyfin will be accessible at http://localhost:8096"
+    echo "Initial setup will be completed via the web interface on first run."
     echo ""
 
     # Ask for authentication credentials (optional)
@@ -188,8 +188,8 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
         ["RADARR_UID"]="radarr"
         ["RECYCLARR_UID"]="recyclarr"
         ["PROWLARR_UID"]="prowlarr"
-        ["OVERSEERR_UID"]="overseerr"
-        ["PLEX_UID"]="plex"
+        ["JELLYSEERR_UID"]="jellyseerr"
+        ["JELLYFIN_UID"]="jellyfin"
         ["DECYPHARR_UID"]="decypharr"
         ["AUTOSCAN_UID"]="autoscan"
     )
@@ -257,10 +257,6 @@ ROOT_DIR=$INSTALL_DIR
 # SECRETS & TOKENS - KEEP PRIVATE
 # =============================================================================
 
-# Plex claim token (valid for 4 minutes after generation)
-# Get from: https://www.plex.tv/claim/
-PLEX_CLAIM=${PLEX_CLAIM:-}
-
 # Real-Debrid API token
 # Get from: https://real-debrid.com/apitoken
 REALDEBRID_TOKEN=$REALDEBRID_TOKEN
@@ -293,8 +289,8 @@ SONARR_UID=${SONARR_UID}
 RADARR_UID=${RADARR_UID}
 RECYCLARR_UID=${RECYCLARR_UID}
 PROWLARR_UID=${PROWLARR_UID}
-OVERSEERR_UID=${OVERSEERR_UID}
-PLEX_UID=${PLEX_UID}
+JELLYSEERR_UID=${JELLYSEERR_UID}
+JELLYFIN_UID=${JELLYFIN_UID}
 DECYPHARR_UID=${DECYPHARR_UID}
 AUTOSCAN_UID=${AUTOSCAN_UID}
 
@@ -334,11 +330,6 @@ echo ""
 echo "CREDENTIALS"
 echo "-----------"
 echo "Real-Debrid token:     ${REALDEBRID_TOKEN:0:20}... (configured)"
-if [ -n "$PLEX_CLAIM" ]; then
-    echo "Plex claim token:      ${PLEX_CLAIM:0:20}... (configured)"
-else
-    echo "Plex claim token:      (skipped - configure later)"
-fi
 echo ""
 echo "USERS TO BE CREATED"
 echo "-------------------"
@@ -347,8 +338,8 @@ echo "  - sonarr (UID: ${SONARR_UID})"
 echo "  - radarr (UID: ${RADARR_UID})"
 echo "  - recyclarr (UID: ${RECYCLARR_UID})"
 echo "  - prowlarr (UID: ${PROWLARR_UID})"
-echo "  - overseerr (UID: ${OVERSEERR_UID})"
-echo "  - plex (UID: ${PLEX_UID})"
+echo "  - jellyseerr (UID: ${JELLYSEERR_UID})"
+echo "  - jellyfin (UID: ${JELLYFIN_UID})"
 echo "  - decypharr (UID: ${DECYPHARR_UID})"
 echo "  - autoscan (UID: ${AUTOSCAN_UID})"
 echo "  - pinchflat (UID: ${PINCHFLAT_UID})"
@@ -359,7 +350,7 @@ echo "  - mediacenter (GID: ${MEDIACENTER_GID})"
 echo ""
 echo "DIRECTORIES TO BE CREATED"
 echo "-------------------------"
-echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,plex,autoscan,zilean,decypharr}-config"
+echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr}-config"
 echo "  - ${ROOT_DIR}/data/symlinks/{radarr,sonarr}"
 echo "  - ${ROOT_DIR}/data/realdebrid-zurg"
 echo "  - ${ROOT_DIR}/data/media/{movies,tv}"
@@ -414,7 +405,7 @@ add_user_to_group $USER mediacenter
 # Create directories
 echo ""
 echo "Creating directory structure..."
-sudo mkdir -pv "${ROOT_DIR}/config"/{sonarr,radarr,recyclarr,prowlarr,overseerr,plex,autoscan,zilean,decypharr,pinchflat}-config
+sudo mkdir -pv "${ROOT_DIR}/config"/{sonarr,radarr,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr,pinchflat}-config
 sudo mkdir -pv "${ROOT_DIR}/data/symlinks"/{radarr,sonarr}
 sudo mkdir -pv "${ROOT_DIR}/data/realdebrid-zurg"
 sudo mkdir -pv "${ROOT_DIR}/data/media"/{movies,tv}
@@ -432,8 +423,9 @@ sudo chown -R sonarr:mediacenter ${ROOT_DIR}/config/sonarr-config
 sudo chown -R radarr:mediacenter ${ROOT_DIR}/config/radarr-config
 sudo chown -R recyclarr:mediacenter ${ROOT_DIR}/config/recyclarr-config
 sudo chown -R prowlarr:mediacenter ${ROOT_DIR}/config/prowlarr-config
-sudo chown -R overseerr:mediacenter ${ROOT_DIR}/config/overseerr-config
-sudo chown -R plex:mediacenter ${ROOT_DIR}/config/plex-config
+sudo chown -R jellyseerr:mediacenter ${ROOT_DIR}/config/jellyseerr-config
+sudo chown -R jellyfin:mediacenter ${ROOT_DIR}/config/jellyfin-config
+sudo chown -R jellyfin:mediacenter ${ROOT_DIR}/config/jellyfin-cache-config
 sudo chown -R decypharr:mediacenter ${ROOT_DIR}/config/decypharr-config
 sudo chown -R autoscan:mediacenter ${ROOT_DIR}/config/autoscan-config
 sudo chown -R pinchflat:mediacenter ${ROOT_DIR}/config/pinchflat-config
@@ -646,13 +638,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # Copy healthcheck scripts to /usr/local/bin/
     sudo cp "$SCRIPT_DIR/scripts/health/arrs-mount-healthcheck.sh" /usr/local/bin/
-    sudo cp "$SCRIPT_DIR/scripts/health/plex-mount-healthcheck.sh" /usr/local/bin/
+    sudo cp "$SCRIPT_DIR/scripts/health/jellyfin-mount-healthcheck.sh" /usr/local/bin/
 
     # Set permissions
     sudo chmod 775 /usr/local/bin/arrs-mount-healthcheck.sh
-    sudo chmod 775 /usr/local/bin/plex-mount-healthcheck.sh
+    sudo chmod 775 /usr/local/bin/jellyfin-mount-healthcheck.sh
     sudo chown $USER:$USER /usr/local/bin/arrs-mount-healthcheck.sh
-    sudo chown $USER:$USER /usr/local/bin/plex-mount-healthcheck.sh
+    sudo chown $USER:$USER /usr/local/bin/jellyfin-mount-healthcheck.sh
 
     # Create logs directory
     sudo mkdir -p ${ROOT_DIR}/logs
@@ -669,12 +661,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Add cron jobs if they don't already exist
         (crontab -l 2>/dev/null | grep -v "arrs-mount-healthcheck"; echo "*/30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh") | crontab -
-        (crontab -l 2>/dev/null | grep -v "plex-mount-healthcheck"; echo "*/35 * * * * /usr/local/bin/plex-mount-healthcheck.sh") | crontab -
+        (crontab -l 2>/dev/null | grep -v "jellyfin-mount-healthcheck"; echo "*/35 * * * * /usr/local/bin/jellyfin-mount-healthcheck.sh") | crontab -
         echo "✓ Cron jobs added successfully"
     else
         echo "Skipping cron job configuration. You can add them manually later:"
         echo "  */30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh"
-        echo "  */35 * * * * /usr/local/bin/plex-mount-healthcheck.sh"
+        echo "  */35 * * * * /usr/local/bin/jellyfin-mount-healthcheck.sh"
     fi
 else
     echo "Skipping mount healthcheck installation."
@@ -740,16 +732,15 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         "prowlarr"
         "radarr"
         "sonarr"
-        "overseerr"
-        "plex"
+        "jellyseerr"
+        "jellyfin"
         "zilean"
         "zilean-postgres"
         "homarr"
         "dashdot"
         "autoscan"
-        "tautulli"
+        "jellystat"
         "watchtower"
-        "plextraktsync"
         "pinchflat"
     )
 
@@ -1132,7 +1123,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo ""
             echo "  ✓ Recyclarr configuration completed"
             echo "  ✓ Quality profiles created: Recyclarr-1080p, Recyclarr-2160p, Recyclarr-Any"
-            echo "  ✓ Media naming configured for Plex"
+            echo "  ✓ Media naming configured for Jellyfin"
         else
             echo ""
             echo "  ⚠ Recyclarr sync failed (non-critical)"
@@ -1214,8 +1205,8 @@ echo "             - Radarr/Sonarr sync enabled (indexers auto-synced)"
 echo "  ✓ Recyclarr - Quality profiles and naming conventions from TRaSH Guides"
 echo ""
 echo "SERVICES REQUIRING MANUAL CONFIGURATION:"
-echo "  • Plex - Add media libraries (/data/media/movies, /data/media/tv)"
-echo "  • Overseerr - Connect to Plex and Radarr/Sonarr (optional)"
+echo "  • Jellyfin - Add media libraries (/data/media/movies, /data/media/tv)"
+echo "  • Jellyseerr - Connect to Jellyfin and Radarr/Sonarr (optional)"
 echo "  • Prowlarr - Add more indexers if needed (optional)"
 echo ""
 echo "IMPORTANT - ZILEAN INDEXER:"
@@ -1228,22 +1219,22 @@ echo "Next steps:"
 echo "1. All services are now running! You can access them at:"
 if [ "$TRAEFIK_ENABLED" = true ]; then
     echo "   • Traefik Dashboard: http://${DOMAIN_NAME}:8080"
-    echo "   • Prowlarr:  http://prowlarr.${DOMAIN_NAME}  (already configured!)"
-    echo "   • Radarr:    http://radarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Sonarr:    http://sonarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Overseerr: http://overseerr.${DOMAIN_NAME}"
-    echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
+    echo "   • Prowlarr:   http://prowlarr.${DOMAIN_NAME}  (already configured!)"
+    echo "   • Radarr:     http://radarr.${DOMAIN_NAME}    (already configured!)"
+    echo "   • Sonarr:     http://sonarr.${DOMAIN_NAME}    (already configured!)"
+    echo "   • Jellyseerr: http://jellyseerr.${DOMAIN_NAME}"
+    echo "   • Jellyfin:   http://${DOMAIN_NAME}:8096/web"
 else
-    echo "   • Prowlarr:  http://${DOMAIN_NAME}:9696  (already configured!)"
-    echo "   • Radarr:    http://${DOMAIN_NAME}:7878  (already configured!)"
-    echo "   • Sonarr:    http://${DOMAIN_NAME}:8989  (already configured!)"
-    echo "   • Overseerr: http://${DOMAIN_NAME}:5055"
-    echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
+    echo "   • Prowlarr:   http://${DOMAIN_NAME}:9696  (already configured!)"
+    echo "   • Radarr:     http://${DOMAIN_NAME}:7878  (already configured!)"
+    echo "   • Sonarr:     http://${DOMAIN_NAME}:8989  (already configured!)"
+    echo "   • Jellyseerr: http://${DOMAIN_NAME}:5055"
+    echo "   • Jellyfin:   http://${DOMAIN_NAME}:8096/web"
 fi
 echo ""
 echo "2. Configure remaining services manually:"
 echo ""
-echo "   PLEX - Add media libraries:"
+echo "   JELLYFIN - Add media libraries:"
 echo "   • Movies: /data/media/movies"
 echo "   • TV Shows: /data/media/tv"
 echo "   • YouTube: /data/media/youtube"

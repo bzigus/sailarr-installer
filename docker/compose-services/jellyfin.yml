@@ -1,0 +1,32 @@
+# Jellyfin Media Server
+
+services:
+  jellyfin:
+    image: ${JELLYFIN_IMAGE}:${JELLYFIN_TAG}
+    env_file:
+      - ../.env.defaults
+      - ../.env.local
+    container_name: jellyfin
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - PUID=${JELLYFIN_UID}
+      - PGID=${MEDIACENTER_GID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${ROOT_DIR}/config/jellyfin-config:/config
+      - ${ROOT_DIR}/config/jellyfin-cache:/cache
+      - ${ROOT_DIR}/data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8096/health && test -d /data/realdebrid-zurg && mountpoint -q /data/realdebrid-zurg"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      jellyseerr:
+        condition: service_healthy
+        restart: true
+      rclone:
+        condition: service_healthy
+        restart: true

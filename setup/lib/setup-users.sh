@@ -89,16 +89,15 @@ setup_mediacenter_users() {
     local radarr_uid=$(find_available_uid $((sonarr_uid + 1)))
     local recyclarr_uid=$(find_available_uid $((radarr_uid + 1)))
     local prowlarr_uid=$(find_available_uid $((recyclarr_uid + 1)))
-    local overseerr_uid=$(find_available_uid $((prowlarr_uid + 1)))
-    local plex_uid=$(find_available_uid $((overseerr_uid + 1)))
-    local decypharr_uid=$(find_available_uid $((plex_uid + 1)))
+    local jellyseerr_uid=$(find_available_uid $((prowlarr_uid + 1)))
+    local jellyfin_uid=$(find_available_uid $((jellyseerr_uid + 1)))
+    local decypharr_uid=$(find_available_uid $((jellyfin_uid + 1)))
     local autoscan_uid=$(find_available_uid $((decypharr_uid + 1)))
     local pinchflat_uid=$(find_available_uid $((autoscan_uid + 1)))
     local zilean_uid=$(find_available_uid $((pinchflat_uid + 1)))
     local zurg_uid=$(find_available_uid $((zilean_uid + 1)))
-    local tautulli_uid=$(find_available_uid $((zurg_uid + 1)))
-    local homarr_uid=$(find_available_uid $((tautulli_uid + 1)))
-    local plextraktsync_uid=$(find_available_uid $((homarr_uid + 1)))
+    local jellystat_uid=$(find_available_uid $((zurg_uid + 1)))
+    local homarr_uid=$(find_available_uid $((jellystat_uid + 1)))
 
     # Create main group
     create_system_group "mediacenter" "$mediacenter_gid"
@@ -109,16 +108,15 @@ setup_mediacenter_users() {
     create_system_user "radarr" "$radarr_uid" "$mediacenter_gid" "Radarr"
     create_system_user "recyclarr" "$recyclarr_uid" "$mediacenter_gid" "Recyclarr"
     create_system_user "prowlarr" "$prowlarr_uid" "$mediacenter_gid" "Prowlarr"
-    create_system_user "overseerr" "$overseerr_uid" "$mediacenter_gid" "Overseerr"
-    create_system_user "plex" "$plex_uid" "$mediacenter_gid" "Plex Media Server"
+    create_system_user "jellyseerr" "$jellyseerr_uid" "$mediacenter_gid" "Jellyseerr"
+    create_system_user "jellyfin" "$jellyfin_uid" "$mediacenter_gid" "Jellyfin Media Server"
     create_system_user "decypharr" "$decypharr_uid" "$mediacenter_gid" "Decypharr"
     create_system_user "autoscan" "$autoscan_uid" "$mediacenter_gid" "Autoscan"
     create_system_user "pinchflat" "$pinchflat_uid" "$mediacenter_gid" "Pinchflat"
     create_system_user "zilean" "$zilean_uid" "$mediacenter_gid" "Zilean"
     create_system_user "zurg" "$zurg_uid" "$mediacenter_gid" "Zurg"
-    create_system_user "tautulli" "$tautulli_uid" "$mediacenter_gid" "Tautulli"
+    create_system_user "jellystat" "$jellystat_uid" "$mediacenter_gid" "Jellystat"
     create_system_user "homarr" "$homarr_uid" "$mediacenter_gid" "Homarr"
-    create_system_user "plextraktsync" "$plextraktsync_uid" "$mediacenter_gid" "PlexTraktSync"
 
     # Export UIDs/GIDs for use in .env files
     export MEDIACENTER_GID=$mediacenter_gid
@@ -127,16 +125,15 @@ setup_mediacenter_users() {
     export RADARR_UID=$radarr_uid
     export RECYCLARR_UID=$recyclarr_uid
     export PROWLARR_UID=$prowlarr_uid
-    export OVERSEERR_UID=$overseerr_uid
-    export PLEX_UID=$plex_uid
+    export JELLYSEERR_UID=$jellyseerr_uid
+    export JELLYFIN_UID=$jellyfin_uid
     export DECYPHARR_UID=$decypharr_uid
     export AUTOSCAN_UID=$autoscan_uid
     export PINCHFLAT_UID=$pinchflat_uid
     export ZILEAN_UID=$zilean_uid
     export ZURG_UID=$zurg_uid
-    export TAUTULLI_UID=$tautulli_uid
+    export JELLYSTAT_UID=$jellystat_uid
     export HOMARR_UID=$homarr_uid
-    export PLEXTRAKTSYNC_UID=$plextraktsync_uid
 
     log_success "All users and groups created successfully"
 }
