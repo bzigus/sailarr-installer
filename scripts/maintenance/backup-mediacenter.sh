@@ -105,7 +105,7 @@ cat > "${BACKUP_DIR}/RESTORE-INSTRUCTIONS.md" << 'EOF'
    ```
 
 5. **Update configuration:**
-   - Edit `.env` with your timezone and Plex claim token
+   - Edit `.env` with your timezone
    - Edit `zurg.yml` with your Real-Debrid API key
    - Update any service-specific configurations as needed
 
@@ -121,7 +121,7 @@ cat > "${BACKUP_DIR}/RESTORE-INSTRUCTIONS.md" << 'EOF'
 
 ## Important Notes
 - Media files are NOT included in this backup
-- Update Plex claim token (valid for 4 minutes only)
+- Jellyfin initial setup is done via web UI on first run
 - Verify Real-Debrid API key in zurg.yml
 - Check service-specific configurations for any hardcoded paths or keys
 
@@ -143,12 +143,12 @@ Mount Path: ${MOUNT_ROOT}
 System: $(uname -a)
 
 Services Included:
-- Plex Media Server
-- Overseerr (Request Management)
+- Jellyfin Media Server
+- Jellyseerr (Request Management)
 - Prowlarr (Indexer Management)  
 - Radarr (Movie Management)
 - Sonarr (TV Management)
-- RDTClient (Download Client)
+- Decypharr (Download Client)
 - Zurg (Real-Debrid WebDAV)
 - Zilean (Torrent Indexer)
 - Recyclarr (Quality Profiles)
@@ -157,7 +157,7 @@ Services Included:
 - Homarr (Dashboard)
 - DashDot (System Monitor)
 - Pinchflat (YouTube Downloader)
-- PlexTraktSync (Trakt Integration)
+- Jellystat (Jellyfin Statistics)
 - Watchtower (Auto Updates)
 
 Total Config Size: $(du -sh "${BACKUP_DIR}/config" 2>/dev/null | cut -f1 || echo "N/A")

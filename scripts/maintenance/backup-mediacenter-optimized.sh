@@ -62,9 +62,9 @@ for service_dir in ${MEDIACENTER_ROOT}/config/*/; do
         --exclude='metadata/' \
         --exclude='database.db/' \
         --exclude='redis/' \
-        --exclude='Library/Application Support/Plex Media Server/Cache/' \
-        --exclude='Library/Application Support/Plex Media Server/Metadata/' \
-        --exclude='Library/Application Support/Plex Media Server/Media/' \
+        --exclude='jellyfin-cache/' \
+        --exclude='cache/' \
+        --exclude='metadata/' \
         --exclude='access.log' \
         "${service_dir}" "${BACKUP_DIR}/config/${service_name}/" 2>/dev/null || true
 done
