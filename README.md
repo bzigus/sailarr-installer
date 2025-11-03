@@ -4,7 +4,7 @@ Fully automated installation script for creating your own media server powered b
 
 ## What is This?
 
-This installer deploys a complete media automation stack that streams content from Real-Debrid through Plex, using the *Arr applications (Radarr, Sonarr, Prowlarr) to manage your library. The installer handles everything automatically based on your preferences.
+This installer deploys a complete media automation stack that streams content from Real-Debrid through Jellyfin, using the *Arr applications (Radarr, Sonarr, Prowlarr) to manage your library. The installer handles everything automatically based on your preferences.
 
 **Key Features:**
 - **Fully Interactive Setup** - Configure exactly what you need
@@ -44,7 +44,7 @@ The stack includes these services, configured based on your selections:
 
 ### Core Services (Always Installed)
 
-- **[Plex](https://www.plex.tv/)** - Media streaming server
+- **[Jellyfin](https://jellyfin.org/)** - Media streaming server
 - **[Radarr](https://radarr.video/)** - Movie management and automation
 - **[Sonarr](https://sonarr.tv/)** - TV series management and automation
 - **[Prowlarr](https://prowlarr.com/)** - Indexer management for all *Arrs
@@ -52,8 +52,8 @@ The stack includes these services, configured based on your selections:
 - **[Rclone](https://github.com/rclone/rclone)** - Mounts Zurg as local filesystem
 - **[Zilean](https://github.com/iPromKnight/zilean)** - Debrid Media Manager indexer
 - **[PostgreSQL](https://www.postgresql.org/)** - Database for Zilean
-- **[Overseerr](https://overseerr.dev/)** - Media request management
-- **[Autoscan](https://github.com/saltydk/autoscan)** - Automatic Plex library updates
+- **[Jellyseerr](https://github.com/Fallenbagel/jellyseerr)** - Media request management
+- **[Autoscan](https://github.com/saltydk/autoscan)** - Automatic Jellyfin library updates
 
 ### Download Client
 
@@ -64,11 +64,10 @@ The stack includes these services, configured based on your selections:
 ### Additional Services (Always Installed)
 
 - **[Watchtower](https://containrrr.dev/watchtower/)** - Automatic container updates
-- **[Tautulli](https://tautulli.com/)** - Plex monitoring and statistics
+- **[Jellystat](https://github.com/CyferShepard/Jellystat)** - Jellyfin monitoring and statistics
 - **[Homarr](https://homarr.dev/)** - Dashboard for all services
 - **[Dashdot](https://github.com/MauriceNino/dashdot)** - Server monitoring dashboard
-- **[Pinchflat](https://github.com/kieraneglin/pinchflat)** - YouTube downloader for Plex
-- **[Plex-Trakt-Sync](https://github.com/Taxel/PlexTraktSync)** - Sync Plex with Trakt.tv
+- **[Pinchflat](https://github.com/kieraneglin/pinchflat)** - YouTube downloader for Jellyfin
 
 ### Optional Services (Configurable)
 
@@ -89,7 +88,8 @@ During installation, you'll configure:
 - **Installation Directory** - Where to install (default: `/mediacenter`)
 - **Timezone** - Server timezone (default: `Europe/Madrid`)
 - **Real-Debrid API Token** - Your Real-Debrid authentication
-- **Plex Claim Token** - Link Plex to your account (optional)
+
+Jellyfin initial setup is completed via the web interface on first run.
 
 Download client is automatically set to Decypharr.
 
@@ -112,14 +112,14 @@ After installation, access your services at different URLs depending on your con
 
 ### Without Traefik (Direct Access)
 
-- **Plex:** `http://SERVER_IP:32400/web`
+- **Jellyfin:** `http://SERVER_IP:8096/web`
 - **Radarr:** `http://SERVER_IP:7878`
 - **Sonarr:** `http://SERVER_IP:8989`
 - **Prowlarr:** `http://SERVER_IP:9696`
-- **Overseerr:** `http://SERVER_IP:5055`
+- **Jellyseerr:** `http://SERVER_IP:5055`
 - **Zilean:** `http://SERVER_IP:8181`
 - **Decypharr:** `http://SERVER_IP:8283`
-- **Tautulli:** `http://SERVER_IP:8282`
+- **Jellystat:** `http://SERVER_IP:3210`
 - **Homarr:** `http://SERVER_IP:7575`
 - **Dashdot:** `http://SERVER_IP:3001`
 - **Pinchflat:** `http://SERVER_IP:8945`
@@ -131,14 +131,14 @@ Replace `SERVER_IP` with your actual server IP address or hostname.
 
 Services are accessible via subdomains of your configured domain:
 
-- **Plex:** `https://plex.YOUR_DOMAIN`
+- **Jellyfin:** `https://jellyfin.YOUR_DOMAIN`
 - **Radarr:** `https://radarr.YOUR_DOMAIN`
 - **Sonarr:** `https://sonarr.YOUR_DOMAIN`
 - **Prowlarr:** `https://prowlarr.YOUR_DOMAIN`
-- **Overseerr:** `https://overseerr.YOUR_DOMAIN`
+- **Jellyseerr:** `https://jellyseerr.YOUR_DOMAIN`
 - **Zilean:** `https://zilean.YOUR_DOMAIN`
 - **Decypharr:** `https://decypharr.YOUR_DOMAIN`
-- **Tautulli:** `https://tautulli.YOUR_DOMAIN`
+- **Jellystat:** `https://jellystat.YOUR_DOMAIN`
 - **Homarr:** `https://homarr.YOUR_DOMAIN`
 - **Dashdot:** `https://dashdot.YOUR_DOMAIN`
 - **Pinchflat:** `https://pinchflat.YOUR_DOMAIN`

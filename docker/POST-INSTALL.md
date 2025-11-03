@@ -4,8 +4,8 @@ This guide covers the manual configuration steps required after running the auto
 
 ## Table of Contents
 
-1. [Overseerr Configuration](#overseerr-configuration)
-   - [Connect Plex Account](#1-connect-plex-account)
+1. [Jellyseerr Configuration](#jellyseerr-configuration)
+   - [Connect Jellyfin Account](#1-connect-jellyfin-account)
    - [Select Libraries](#2-select-libraries)
    - [Add Radarr Server](#3-add-radarr-server)
    - [Add Sonarr Server](#4-add-sonarr-server)
@@ -14,33 +14,34 @@ This guide covers the manual configuration steps required after running the auto
 
 ---
 
-## Overseerr Configuration
+## Jellyseerr Configuration
 
-Overseerr is your media request management system that connects to Plex, Radarr, and Sonarr.
+Jellyseerr is your media request management system that connects to Jellyfin, Radarr, and Sonarr.
 
-### Access Overseerr
+### Access Jellyseerr
 
 1. Open your browser and navigate to: `http://YOUR_SERVER_IP:5055`
-2. You'll be greeted with the Overseerr setup wizard
+2. You'll be greeted with the Jellyseerr setup wizard
 
-### 1. Connect Plex Account
+### 1. Connect Jellyfin Account
 
-**Step 1: Sign in with Plex**
-- Click **"Sign in with Plex"**
-- Authorize Overseerr to access your Plex account
-- Select your Plex server from the list
+**Step 1: Sign in with Jellyfin**
+- Click **"Use Jellyfin Account"**
+- Enter your Jellyfin server URL: `http://jellyfin:8096` (or `http://YOUR_SERVER_IP:8096` for external access)
+- Enter your Jellyfin admin username and password
+- Click **Sign In**
 
 **Step 2: Server Configuration**
-- **Plex Server**: Should auto-detect your server
+- **Jellyfin Server**: Should auto-detect your server
 - **Server Name**: Leave as default (usually your hostname)
 - Click **Continue**
 
 ### 2. Select Libraries
 
 **Step 3: Library Selection**
-- Enable the libraries you want Overseerr to manage:
-  - ☑ **Movies** (your Plex Movies library)
-  - ☑ **TV Shows** (your Plex TV Shows library)
+- Enable the libraries you want Jellyseerr to manage:
+  - ☑ **Movies** (your Jellyfin Movies library)
+  - ☑ **TV Shows** (your Jellyfin TV Shows library)
 - Click **Continue**
 
 ### 3. Add Radarr Server

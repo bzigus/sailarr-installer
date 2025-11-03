@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Sailarr Installer is an automated Docker-based media streaming stack that leverages Real-Debrid and the *Arr ecosystem to create an "infinite" media library. This is a microservices architecture project using Docker Compose to orchestrate multiple services including Plex, Overseerr, Radarr, Sonarr, Prowlarr, Zilean, Zurg, Decypharr, Recyclarr, Autoscan, Tautulli, Homarr, Pinchflat, PlexTraktSync, and Watchtower.
+Sailarr Installer is an automated Docker-based media streaming stack that leverages Real-Debrid and the *Arr ecosystem to create an "infinite" media library. This is a microservices architecture project using Docker Compose to orchestrate multiple services including Jellyfin, Jellyseerr, Radarr, Sonarr, Prowlarr, Zilean, Zurg, Decypharr, Recyclarr, Autoscan, Jellystat, Homarr, Pinchflat, and Watchtower.
 
 ## Essential Commands
 
@@ -69,15 +69,15 @@ crontab -l | grep healthcheck
 
 ### Data Flow Pattern
 The system uses a **symlink-based architecture** optimized for hardlinking:
-1. **Request**: Overseerr → Radarr/Sonarr → Prowlarr → Zilean/Torrentio/Public Indexers
+1. **Request**: Jellyseerr → Radarr/Sonarr → Prowlarr → Zilean/Torrentio/Public Indexers
 2. **Download**: Decypharr → Real-Debrid → Zurg → Rclone Mount
-3. **Media**: Symlinks → Media folders → Plex → Autoscan refresh → PlexTraktSync tracking
+3. **Media**: Symlinks → Media folders → Jellyfin → Autoscan refresh
 
 ### Services List
 
 **Core Media Stack:**
-- **Plex** - Media server (host network mode)
-- **Overseerr** - Request management interface (port 5055)
+- **Jellyfin** - Media server (host network mode, port 8096)
+- **Jellyseerr** - Request management interface (port 5055)
 - **Radarr** - Movie management (port 7878)
 - **Sonarr** - TV show management (port 8989)
 - **Prowlarr** - Indexer manager (port 9696)
@@ -94,9 +94,8 @@ The system uses a **symlink-based architecture** optimized for hardlinking:
 
 **Automation & Monitoring:**
 - **Recyclarr** - Automated quality profiles via TRaSH Guides
-- **Autoscan** - Plex library auto-update (port 3030)
-- **Tautulli** - Plex statistics and monitoring (port 8282)
-- **PlexTraktSync** - Sync Plex watch history to Trakt
+- **Autoscan** - Jellyfin library auto-update (port 3030)
+- **Jellystat** - Jellyfin statistics and monitoring (port 3210)
 - **Watchtower** - Automatic container updates
 - **Homarr** - Dashboard for all services (port 7575)
 - **Pinchflat** - YouTube download manager (port 8945)
@@ -108,19 +107,19 @@ The system uses a **symlink-based architecture** optimized for hardlinking:
 ```
 ${ROOT_DIR}/
 ├── config/              # Container configurations (created by setup.sh)
-│   ├── plex-config/
+│   ├── jellyfin-config/
+│   ├── jellyfin-cache/
 │   ├── radarr-config/
 │   ├── sonarr-config/
 │   ├── prowlarr-config/
-│   ├── overseerr-config/
+│   ├── jellyseerr-config/
 │   ├── zilean-config/
 │   ├── zurg-config/
 │   ├── autoscan-config/
 │   ├── decypharr-config/
-│   ├── tautulli-config/
+│   ├── jellystat-config/
 │   ├── homarr-config/
 │   ├── pinchflat-config/
-│   ├── plextraktsync-config/
 │   └── traefik-config/  # Only if Traefik enabled
 ├── data/
 │   ├── media/
@@ -153,7 +152,7 @@ ${ROOT_DIR}/
 ├── scripts/            # Maintenance scripts
 │   ├── health/        # Health check scripts
 │   │   ├── arrs-mount-healthcheck.sh
-│   │   └── plex-mount-healthcheck.sh
+│   │   └── jellyfin-mount-healthcheck.sh
 │   ├── maintenance/   # Backup scripts
 │   │   ├── backup-mediacenter.sh
 │   │   └── backup-mediacenter-optimized.sh
@@ -176,7 +175,7 @@ ${ROOT_DIR}/
     ├── restart.sh     # Helper script to restart stack
     └── compose-services/  # Split compose files
         ├── core.yml
-        ├── plex.yml
+        ├── jellyfin.yml
         ├── radarr.yml
         └── ... (one file per service)
 ```
@@ -202,14 +201,14 @@ ${ROOT_DIR}/
 The setup.sh script creates system users with dynamic UIDs/GIDs starting from 1000 and sets critical permissions (775/664, umask 002). All containers run with these user IDs for proper file access.
 
 **System users created:**
-- rclone, sonarr, radarr, recyclarr, prowlarr, overseerr, plex, decypharr, autoscan, pinchflat, zilean, zurg, tautulli, homarr, plextraktsync
+- rclone, sonarr, radarr, recyclarr, prowlarr, jellyseerr, jellyfin, decypharr, autoscan, pinchflat, zilean, zurg, jellystat, homarr
 
 All users are added to the `mediacenter` group for shared access.
 
 ## Important Notes
 
 ### First-Run Behavior
-- **Plex claim token**: Valid for only 4 minutes, obtain from https://plex.tv/claim and set in .env.local
+- **Jellyfin setup**: Configure admin account and libraries via web UI on first run
 - **Real-Debrid token**: Must be configured during setup.sh interactive prompts
 - **Zilean database**: Initial torrent indexing can take >1.5 days (Zilean indexer disabled by default until ready)
 - **Health checks**: Installed as cron jobs, run every 30-35 minutes to verify mounts
@@ -264,7 +263,7 @@ This is a configuration-heavy deployment project without formal tests. Validatio
 ## Common Issues & Solutions
 
 ### Rclone Mount Issues
-If Plex or *Arr services can't access media:
+If Jellyfin or *Arr services can't access media:
 ```bash
 # Check mount status
 mountpoint /YOUR_INSTALL_DIR/data/realdebrid-zurg
