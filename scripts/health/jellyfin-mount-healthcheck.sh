@@ -1,9 +1,9 @@
 #!/bin/bash
-# Plex Mount Healthcheck Script
-# Verifies that Plex can access the rclone mount
+# Jellyfin Mount Healthcheck Script
+# Verifies that Jellyfin can access the rclone mount
 # If not, restarts the container
 
-LOG_FILE="/mediacenter/logs/plex-mount-healthcheck.log"
+LOG_FILE="/mediacenter/logs/jellyfin-mount-healthcheck.log"
 TEST_FILE="/data/realdebrid-zurg/torrents/.healthcheck_test.txt"
 DOCKER_COMPOSE_DIR="/mediacenter/docker"
 
@@ -32,10 +32,10 @@ restart_container() {
     fi
 }
 
-# Check Plex
-if ! check_container "plex"; then
-    log "FAILED: Plex cannot access $TEST_FILE"
-    restart_container "plex"
+# Check Jellyfin
+if ! check_container "jellyfin"; then
+    log "FAILED: Jellyfin cannot access $TEST_FILE"
+    restart_container "jellyfin"
 else
-    log "OK: Plex mount check passed"
+    log "OK: Jellyfin mount check passed"
 fi

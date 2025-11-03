@@ -26,11 +26,6 @@ Before starting the installation, ensure you have:
    - Get your API token from https://real-debrid.com/apitoken
    - Keep this token ready for the installation
 
-4. **Plex claim token (optional)**
-   - Only needed if you want hardware transcoding or remote access
-   - Get it from https://www.plex.tv/claim/
-   - The token expires after 4 minutes, so get it right before installation
-
 ## Installation Steps
 
 ### Step 1: Clone the Repository
@@ -111,42 +106,7 @@ Enter your Real-Debrid API token (get it from https://real-debrid.com/apitoken):
 - Zurg: To mount your Real-Debrid library
 - Decypharr: To add torrents to Real-Debrid
 
-### Question 3: Plex Claim Token (Optional)
-
-```
-Enter your Plex claim token (optional, get it from https://www.plex.tv/claim/):
-Press Enter to skip if you don't want to claim the server now.
-```
-
-**What it does:** Claims your Plex server to your Plex account, enabling remote access and hardware transcoding.
-
-**How to get it:**
-1. Go to https://www.plex.tv/claim/
-2. Log in to your Plex account
-3. Copy the claim token shown
-
-**Format:** Starts with `claim-` followed by alphanumeric characters (e.g., `claim-AbCdEfGhIjKlMnOp`)
-
-**Important:**
-- The token expires after 4 minutes - get it right before you need to enter it
-- If it expires, just get a new one from the same URL
-
-**When to use it:**
-- You want to access Plex remotely (outside your local network)
-- You want hardware transcoding support
-- You want to use Plex features that require authentication
-
-**When to skip it:**
-- You only need local network access
-- You'll claim the server manually later through the Plex web interface
-- You're testing and don't want to connect to your main Plex account
-
-**Can you add it later?** Yes! You can claim the server later by:
-1. Going to `http://YOUR_SERVER_IP:32400/web`
-2. Logging in with your Plex account
-3. Following the setup wizard
-
-### Question 4: Timezone
+### Question 3: Timezone
 
 ```
 Enter timezone [press Enter for default]:
@@ -310,7 +270,7 @@ After answering all questions, the installer will:
 
 ### 7. Health Monitoring Setup (5 seconds)
 - Installs cron jobs for mount health checks
-- Plex: Every 35 minutes
+- Jellyfin: Every 35 minutes
 - Arrs: Every 30 minutes
 - Creates log files in `/mediacenter/logs/`
 
@@ -332,14 +292,14 @@ Access URLs depend on whether you enabled Traefik or not.
 
 #### Without Traefik (Direct Port Access)
 
-- **Plex:** `http://YOUR_SERVER_IP:32400/web`
+- **Jellyfin:** `http://YOUR_SERVER_IP:8096/web`
 - **Radarr:** `http://YOUR_SERVER_IP:7878`
 - **Sonarr:** `http://YOUR_SERVER_IP:8989`
 - **Prowlarr:** `http://YOUR_SERVER_IP:9696`
-- **Overseerr:** `http://YOUR_SERVER_IP:5055`
+- **Jellyseerr:** `http://YOUR_SERVER_IP:5055`
 - **Zilean:** `http://YOUR_SERVER_IP:8181`
 - **Decypharr:** `http://YOUR_SERVER_IP:8283`
-- **Tautulli:** `http://YOUR_SERVER_IP:8282`
+- **Jellystat:** `http://YOUR_SERVER_IP:3210`
 - **Homarr:** `http://YOUR_SERVER_IP:7575`
 - **Dashdot:** `http://YOUR_SERVER_IP:3001`
 - **Pinchflat:** `http://YOUR_SERVER_IP:8945`
@@ -351,14 +311,14 @@ Replace `YOUR_SERVER_IP` with your server's IP address.
 
 All services are accessible via subdomains:
 
-- **Plex:** `https://plex.YOUR_DOMAIN`
+- **Jellyfin:** `https://jellyfin.YOUR_DOMAIN`
 - **Radarr:** `https://radarr.YOUR_DOMAIN`
 - **Sonarr:** `https://sonarr.YOUR_DOMAIN`
 - **Prowlarr:** `https://prowlarr.YOUR_DOMAIN`
-- **Overseerr:** `https://overseerr.YOUR_DOMAIN`
+- **Jellyseerr:** `https://jellyseerr.YOUR_DOMAIN`
 - **Zilean:** `https://zilean.YOUR_DOMAIN`
 - **Decypharr:** `https://decypharr.YOUR_DOMAIN`
-- **Tautulli:** `https://tautulli.YOUR_DOMAIN`
+- **Jellystat:** `https://jellystat.YOUR_DOMAIN`
 - **Homarr:** `https://homarr.YOUR_DOMAIN`
 - **Dashdot:** `https://dashdot.YOUR_DOMAIN`
 - **Pinchflat:** `https://pinchflat.YOUR_DOMAIN`
@@ -370,18 +330,19 @@ Replace `YOUR_DOMAIN` with the domain you configured during installation.
 
 ### Initial Setup Tasks
 
-1. **Plex Library Setup:**
-   - Access Plex at your configured URL
+1. **Jellyfin Library Setup:**
+   - Access Jellyfin at your configured URL
+   - Complete initial setup wizard (create admin account, set preferences)
    - Add movie library: `/data/media/movies`
    - Add TV library: `/data/media/tv`
    - Configure metadata preferences
    - Set library scanner to run automatically
 
-2. **Overseerr Setup:**
-   - Open Overseerr at your configured URL
+2. **Jellyseerr Setup:**
+   - Open Jellyseerr at your configured URL
    - **📖 Follow the detailed guide:** [docker/POST-INSTALL.md](docker/POST-INSTALL.md)
    - The guide includes step-by-step instructions with exact values for:
-     - Connecting to Plex
+     - Connecting to Jellyfin
      - Adding Radarr server with API keys and settings
      - Adding Sonarr server with API keys and settings
    - API keys are displayed at the end of the installation
@@ -394,9 +355,9 @@ Replace `YOUR_DOMAIN` with the domain you configured during installation.
 
 ### First Request
 
-Once Overseerr is configured (see [docker/POST-INSTALL.md](docker/POST-INSTALL.md)):
+Once Jellyseerr is configured (see [docker/POST-INSTALL.md](docker/POST-INSTALL.md)):
 
-1. Open Overseerr at your configured URL
+1. Open Jellyseerr at your configured URL
 2. Search for a movie or TV show
 3. Click "Request" and confirm
 4. Monitor progress:
@@ -404,7 +365,7 @@ Once Overseerr is configured (see [docker/POST-INSTALL.md](docker/POST-INSTALL.m
    - The *arr apps will search indexers and send to Decypharr
    - Decypharr adds the torrent to Real-Debrid
    - Once cached, the symlink is created automatically
-5. Plex will auto-scan and the content appears in your library
+5. Jellyfin will auto-scan and the content appears in your library
 6. Start streaming!
 
 **Note:** First requests may take 2-5 minutes. Subsequent requests are usually faster as the cache builds up.

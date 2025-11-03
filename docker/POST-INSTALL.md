@@ -4,8 +4,8 @@ This guide covers the manual configuration steps required after running the auto
 
 ## Table of Contents
 
-1. [Overseerr Configuration](#overseerr-configuration)
-   - [Connect Plex Account](#1-connect-plex-account)
+1. [Jellyseerr Configuration](#jellyseerr-configuration)
+   - [Connect Jellyfin Account](#1-connect-jellyfin-account)
    - [Select Libraries](#2-select-libraries)
    - [Add Radarr Server](#3-add-radarr-server)
    - [Add Sonarr Server](#4-add-sonarr-server)
@@ -14,33 +14,34 @@ This guide covers the manual configuration steps required after running the auto
 
 ---
 
-## Overseerr Configuration
+## Jellyseerr Configuration
 
-Overseerr is your media request management system that connects to Plex, Radarr, and Sonarr.
+Jellyseerr is your media request management system that connects to Jellyfin, Radarr, and Sonarr.
 
-### Access Overseerr
+### Access Jellyseerr
 
 1. Open your browser and navigate to: `http://YOUR_SERVER_IP:5055`
-2. You'll be greeted with the Overseerr setup wizard
+2. You'll be greeted with the Jellyseerr setup wizard
 
-### 1. Connect Plex Account
+### 1. Connect Jellyfin Account
 
-**Step 1: Sign in with Plex**
-- Click **"Sign in with Plex"**
-- Authorize Overseerr to access your Plex account
-- Select your Plex server from the list
+**Step 1: Sign in with Jellyfin**
+- Click **"Use Jellyfin Account"**
+- Enter your Jellyfin server URL: `http://jellyfin:8096` (or `http://YOUR_SERVER_IP:8096` for external access)
+- Enter your Jellyfin admin username and password
+- Click **Sign In**
 
 **Step 2: Server Configuration**
-- **Plex Server**: Should auto-detect your server
+- **Jellyfin Server**: Should auto-detect your server
 - **Server Name**: Leave as default (usually your hostname)
 - Click **Continue**
 
 ### 2. Select Libraries
 
 **Step 3: Library Selection**
-- Enable the libraries you want Overseerr to manage:
-  - ☑ **Movies** (your Plex Movies library)
-  - ☑ **TV Shows** (your Plex TV Shows library)
+- Enable the libraries you want Jellyseerr to manage:
+  - ☑ **Movies** (your Jellyfin Movies library)
+  - ☑ **TV Shows** (your Jellyfin TV Shows library)
 - Click **Continue**
 
 ### 3. Add Radarr Server
@@ -143,10 +144,10 @@ Or find it in the installation summary printed at the end of `./setup.sh`.
 
 ### 5. Finish Setup
 
-**Step 6: Complete Overseerr Setup**
+**Step 6: Complete Jellyseerr Setup**
 - Review your settings
 - Click **"Finish Setup"**
-- Overseerr is now ready to use!
+- Jellyseerr is now ready to use!
 
 ---
 
@@ -158,15 +159,14 @@ Or find it in the installation summary printed at the end of `./setup.sh`.
 
 Homarr provides a unified dashboard for all your services. No additional configuration needed - all services are pre-configured.
 
-### Tautulli (Plex Analytics)
+### Jellystat (Jellyfin Analytics)
 
-**Access**: `http://YOUR_SERVER_IP:8181`
+**Access**: `http://YOUR_SERVER_IP:3210`
 
 **First-time setup:**
-1. Click **"Sign in with Plex"**
-2. Authorize Tautulli
-3. Select your Plex server
-4. Configuration is complete!
+1. Create an admin account
+2. Connect to your Jellyfin server
+3. Configuration is complete!
 
 ### Prowlarr (Indexer Manager)
 
@@ -186,20 +186,20 @@ No additional configuration needed unless you want to add more indexers.
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **Overseerr** | `http://YOUR_SERVER_IP:5055` | Media requests |
-| **Plex** | `http://YOUR_SERVER_IP:32400/web` | Media server |
+| **Jellyseerr** | `http://YOUR_SERVER_IP:5055` | Media requests |
+| **Jellyfin** | `http://YOUR_SERVER_IP:8096/web` | Media server |
 | **Radarr** | `http://YOUR_SERVER_IP:7878` | Movie management |
 | **Sonarr** | `http://YOUR_SERVER_IP:8989` | TV show management |
 | **Prowlarr** | `http://YOUR_SERVER_IP:9696` | Indexer management |
 | **Homarr** | `http://YOUR_SERVER_IP:7575` | Dashboard |
-| **Tautulli** | `http://YOUR_SERVER_IP:8181` | Plex analytics |
+| **Jellystat** | `http://YOUR_SERVER_IP:3210` | Jellyfin analytics |
 | **Zilean** | `http://YOUR_SERVER_IP:8182` | DMM indexer |
 
 ---
 
 ## Troubleshooting
 
-### Overseerr Can't Connect to Radarr/Sonarr
+### Jellyseerr Can't Connect to Radarr/Sonarr
 
 **Problem**: Test button fails with connection error
 
@@ -225,7 +225,7 @@ No additional configuration needed unless you want to add more indexers.
 
 4. Check Docker network:
    ```bash
-   docker network inspect mediacenter | grep -A 5 overseerr
+   docker network inspect mediacenter | grep -A 5 jellyseerr
    ```
 
 ### Quality Profiles Not Loading
@@ -244,9 +244,9 @@ No additional configuration needed unless you want to add more indexers.
    - Radarr: `http://YOUR_SERVER_IP:7878/settings/mediamanagement`
    - Sonarr: `http://YOUR_SERVER_IP:8989/settings/mediamanagement`
 
-### Can't Sign in with Plex
+### Can't Sign in with Jellyfin
 
-**Problem**: Plex authentication fails
+**Problem**: Jellyfin authentication fails
 
 **Solutions**:
 1. Verify Plex is running:
@@ -272,7 +272,7 @@ If you encounter issues:
 
 1. Check service logs:
    ```bash
-   docker logs overseerr
+   docker logs jellyseerr
    docker logs radarr
    docker logs sonarr
    ```

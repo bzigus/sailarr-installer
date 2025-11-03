@@ -54,11 +54,11 @@ touch "${BACKUP_DIR}/data/realdebrid-zurg/.gitkeep"
 # 5. Backup system user configuration info
 echo "   → System users information"
 getent group mediacenter > "${BACKUP_DIR}/mediacenter-group.txt" 2>/dev/null || echo "Group mediacenter not found" > "${BACKUP_DIR}/mediacenter-group.txt"
-getent passwd | grep -E '^(rclone|sonarr|radarr|prowlarr|overseerr|plex|recyclarr|rdtclient|autoscan|traefik|pinchflat|plextraktsync|homarr|dashdot):' > "${BACKUP_DIR}/mediacenter-users.txt" 2>/dev/null || echo "No mediacenter users found" > "${BACKUP_DIR}/mediacenter-users.txt"
+getent passwd | grep -E '^(rclone|sonarr|radarr|prowlarr|jellyseerr|jellyfin|recyclarr|rdtclient|autoscan|traefik|pinchflat|jellystat|homarr|dashdot):' > "${BACKUP_DIR}/mediacenter-users.txt" 2>/dev/null || echo "No mediacenter users found" > "${BACKUP_DIR}/mediacenter-users.txt"
 
 # 6. Docker images list
 echo "   → Docker images list"
-docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}" | grep -E "(mediacenter|traefik|plex|overseerr|prowlarr|sonarr|radarr|zurg|zilean|rclone|autoscan|homarr|dashdot|recyclarr|rdtclient|pinchflat|plextraktsync|watchtower|postgres)" > "${BACKUP_DIR}/docker-images.txt" 2>/dev/null || echo "No mediacenter images found" > "${BACKUP_DIR}/docker-images.txt"
+docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}" | grep -E "(mediacenter|traefik|jellyfin|jellyseerr|prowlarr|sonarr|radarr|zurg|zilean|rclone|autoscan|homarr|dashdot|recyclarr|rdtclient|pinchflat|jellystat|watchtower|postgres)" > "${BACKUP_DIR}/docker-images.txt" 2>/dev/null || echo "No mediacenter images found" > "${BACKUP_DIR}/docker-images.txt"
 
 # 7. Create restore instructions
 cat > "${BACKUP_DIR}/RESTORE-INSTRUCTIONS.md" << 'EOF'
@@ -105,7 +105,7 @@ cat > "${BACKUP_DIR}/RESTORE-INSTRUCTIONS.md" << 'EOF'
    ```
 
 5. **Update configuration:**
-   - Edit `.env` with your timezone and Plex claim token
+   - Edit `.env` with your timezone
    - Edit `zurg.yml` with your Real-Debrid API key
    - Update any service-specific configurations as needed
 
@@ -121,14 +121,14 @@ cat > "${BACKUP_DIR}/RESTORE-INSTRUCTIONS.md" << 'EOF'
 
 ## Important Notes
 - Media files are NOT included in this backup
-- Update Plex claim token (valid for 4 minutes only)
+- Jellyfin initial setup is done via web UI on first run
 - Verify Real-Debrid API key in zurg.yml
 - Check service-specific configurations for any hardcoded paths or keys
 
 ## Service Access
 - Homarr Dashboard: http://home.medianita
-- Overseerr: http://overseerr.medianita  
-- Plex: Network host mode
+- Jellyseerr: http://jellyseerr.medianita  
+- Jellyfin: Network host mode (http://localhost:8096)
 - Other services: Check compose.yml for ports and domains
 EOF
 
@@ -143,12 +143,12 @@ Mount Path: ${MOUNT_ROOT}
 System: $(uname -a)
 
 Services Included:
-- Plex Media Server
-- Overseerr (Request Management)
+- Jellyfin Media Server
+- Jellyseerr (Request Management)
 - Prowlarr (Indexer Management)  
 - Radarr (Movie Management)
 - Sonarr (TV Management)
-- RDTClient (Download Client)
+- Decypharr (Download Client)
 - Zurg (Real-Debrid WebDAV)
 - Zilean (Torrent Indexer)
 - Recyclarr (Quality Profiles)
@@ -157,7 +157,7 @@ Services Included:
 - Homarr (Dashboard)
 - DashDot (System Monitor)
 - Pinchflat (YouTube Downloader)
-- PlexTraktSync (Trakt Integration)
+- Jellystat (Jellyfin Statistics)
 - Watchtower (Auto Updates)
 
 Total Config Size: $(du -sh "${BACKUP_DIR}/config" 2>/dev/null | cut -f1 || echo "N/A")

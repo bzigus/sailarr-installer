@@ -43,6 +43,6 @@ services:
     - ${ROOT_DIR}/config/pinchflat-config:/config
     - ${ROOT_DIR}/data/media/youtube:/downloads
     depends_on:
-      plex:
+      jellyfin:
         condition: service_healthy
         restart: true

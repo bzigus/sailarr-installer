@@ -33,6 +33,6 @@ triggers:
       priority: 1
 
 targets:
-  plex:
-    - url: http://URL_TO_PLEX
-      token: PLEX_TOKEN
+  jellyfin:
+    - url: http://URL_TO_JELLYFIN
+      token: JELLYFIN_TOKEN
