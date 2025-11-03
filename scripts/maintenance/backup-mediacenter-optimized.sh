@@ -168,7 +168,7 @@ These will be regenerated automatically when services start.
    ```
 
 5. **Update configuration:**
-   - Edit `.env` with your timezone and Plex claim token
+   - Edit `.env` with your timezone
    - Edit `zurg.yml` with your Real-Debrid API key
    - Update any service-specific configurations as needed
 
