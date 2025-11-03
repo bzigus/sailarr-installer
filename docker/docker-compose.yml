@@ -15,10 +15,10 @@ include:
   - compose-services/traefik-socket-proxy.yml
   
   # Media Server
-  - compose-services/plex.yml
+  - compose-services/jellyfin.yml
   
   # Request Management
-  - compose-services/overseerr.yml
+  - compose-services/jellyseerr.yml
   
   # Media Management
   - compose-services/radarr.yml
@@ -42,8 +42,7 @@ include:
   
   # Additional Services
   - compose-services/pinchflat.yml
-  - compose-services/plextraktsync.yml
-  - compose-services/tautulli.yml
+  - compose-services/jellystat.yml
   
   # Dashboard & Monitoring
   - compose-services/homarr.yml
