@@ -12,8 +12,8 @@ Each service is defined in its own YAML file for better organization and mainten
 │   ├── networks.yml            # Network configuration
 │   ├── volumes.yml             # Volume definitions
 │   ├── traefik.yml             # Reverse proxy
-│   ├── plex.yml                # Media server
-│   ├── overseerr.yml           # Request management
+│   ├── jellyfin.yml            # Media server
+│   ├── jellyseerr.yml          # Request management
 │   ├── radarr.yml              # Movie management
 │   ├── sonarr.yml              # TV show management
 │   └── ...                     # Other services
@@ -28,8 +28,8 @@ docker compose up -d
 
 ### Start specific services:
 ```bash
-# Start only Plex and Overseerr
-docker compose up -d plex overseerr
+# Start only Jellyfin and Jellyseerr
+docker compose up -d jellyfin jellyseerr
 
 # Start media management stack
 docker compose up -d radarr sonarr prowlarr
@@ -42,7 +42,7 @@ docker compose down
 
 ### View specific service logs:
 ```bash
-docker compose logs -f plex
+docker compose logs -f jellyfin
 docker compose logs -f radarr
 ```
 
@@ -66,10 +66,10 @@ docker compose up -d radarr
 - `volumes.yml` - Shared volumes
 
 ### Media Server
-- `plex.yml` - Plex Media Server
+- `jellyfin.yml` - Jellyfin Media Server
 
 ### Request Management
-- `overseerr.yml` - Media requests
+- `jellyseerr.yml` - Media requests
 
 ### Media Management (*arr stack)
 - `radarr.yml` - Movies
@@ -90,11 +90,11 @@ docker compose up -d radarr
 - `autoscan.yml` - Library updates
 - `watchtower.yml` - Auto updates
 - `pinchflat.yml` - YouTube downloads
-- `plextraktsync.yml` - Trakt sync
 
 ### Dashboard & Monitoring
 - `homarr.yml` - Main dashboard
 - `dashdot.yml` - System monitor
+- `jellystat.yml` - Jellyfin analytics
 
 ## Benefits of This Structure
 

@@ -249,19 +249,19 @@ No additional configuration needed unless you want to add more indexers.
 **Problem**: Jellyfin authentication fails
 
 **Solutions**:
-1. Verify Plex is running:
+1. Verify Jellyfin is running:
    ```bash
-   docker ps | grep plex
+   docker ps | grep jellyfin
    ```
 
-2. Verify Plex is accessible:
+2. Verify Jellyfin is accessible:
    ```bash
-   curl -I http://localhost:32400/web
+   curl -I http://localhost:8096
    ```
 
-3. Check Plex claim token (if recently installed):
+3. Check Jellyfin logs for errors:
    ```bash
-   docker logs plex | grep -i claim
+   docker logs jellyfin | tail -50
    ```
 
 ---
@@ -295,4 +295,4 @@ If you encounter issues:
 
 **Configuration complete!** 🎉
 
-You can now start requesting media through Overseerr. Movies and TV shows will be automatically downloaded and organized by Radarr/Sonarr.
+You can now start requesting media through Jellyseerr. Movies and TV shows will be automatically downloaded and organized by Radarr/Sonarr.

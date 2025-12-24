@@ -218,15 +218,16 @@ After answering all questions, the installer will:
 **Services started:**
 - Zurg (Real-Debrid WebDAV)
 - Rclone (Mount manager)
-- Plex Media Server
+- Jellyfin Media Server
 - Radarr (Movies)
 - Sonarr (TV Shows)
 - Prowlarr (Indexers)
 - Zilean (DMM Indexer)
 - PostgreSQL (Zilean database)
 - Decypharr (Download client)
-- Overseerr (Request management)
+- Jellyseerr (Request management)
 - Autoscan (Library updates)
+- Jellystat (Jellyfin analytics)
 - Traefik (if enabled)
 - Optional services (if selected)
 
@@ -234,7 +235,7 @@ After answering all questions, the installer will:
 - Waits for services to generate API keys
 - Automatically extracts keys from configuration files
 - Stores them for automatic configuration
-- **Displays API keys at the end of installation** for Overseerr setup
+- **Displays API keys at the end of installation** for Jellyseerr setup
 
 ### 5. Configure Services (1-2 minutes)
 
@@ -391,15 +392,16 @@ docker logs <container_name>
 2. Verify the token matches your Real-Debrid account
 3. Test the token at https://api.real-debrid.com/rest/1.0/user (in browser)
 
-### Plex Not Accessible
+### Jellyfin Not Accessible
 
-**If you used a claim token:**
-- Make sure it didn't expire (4-minute limit)
-- Try accessing locally first: http://localhost:32400/web
+**If accessing locally:**
+- Try http://localhost:8096/web
+- Or http://YOUR_SERVER_IP:8096/web
+- Sign in and complete the initial setup wizard
 
-**If you skipped the claim token:**
-- Access via http://YOUR_SERVER_IP:32400/web
-- Sign in and claim the server manually
+**If accessing remotely:**
+- Ensure firewall allows port 8096
+- Check that Jellyfin container is running: `docker ps | grep jellyfin`
 
 ### No Search Results in Radarr/Sonarr
 
@@ -535,10 +537,11 @@ If you encounter issues:
 
 Once installation is complete:
 
-1. Configure Overseerr for content requests
-2. Set up Plex libraries and metadata
-3. Customize quality profiles in Recyclarr
-4. Add additional indexers in Prowlarr
-5. Configure notifications in Radarr/Sonarr
-6. Set up remote access (optional)
-7. Start requesting content and enjoy!
+1. Configure Jellyseerr for content requests
+2. Set up Jellyfin libraries and metadata
+3. Configure Jellystat for monitoring and analytics
+4. Customize quality profiles in Recyclarr
+5. Add additional indexers in Prowlarr
+6. Configure notifications in Radarr/Sonarr
+7. Set up remote access (optional)
+8. Start requesting content and enjoy!
