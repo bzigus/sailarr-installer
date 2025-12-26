@@ -1,6 +1,28 @@
 #!/bin/bash
 # MediaCenter - Recyclarr Sync Script
-# Syncs TRaSH Guide quality profiles and naming conventions to Radarr/Sonarr
+# NOTE: This script is NOT compatible with MediaManager
+# MediaManager has its own built-in quality profile and scoring system
+# This script is kept for backwards compatibility if switching back to Radarr/Sonarr
+
+echo "================================================================"
+echo "NOTICE: Recyclarr is not compatible with MediaManager"
+echo "================================================================"
+echo ""
+echo "MediaManager uses its own quality scoring system configured in"
+echo "the config.toml file under [indexers.title_scoring_rules]"
+echo ""
+echo "If you need to switch back to Radarr/Sonarr:"
+echo "  1. Edit docker/docker-compose.yml"
+echo "  2. Comment out mediamanager.yml"
+echo "  3. Uncomment radarr.yml and sonarr.yml"
+echo "  4. Restore config/recyclarr.yml.legacy to config/recyclarr.yml"
+echo "  5. Run docker compose up -d"
+echo "  6. Then you can use this script again"
+echo ""
+exit 0
+
+# Legacy code below - kept for reference
+# =====================================================
 
 set -e
 
@@ -49,7 +71,7 @@ awk -v radarr_key="${RADARR_API_KEY}" -v sonarr_key="${SONARR_API_KEY}" '
         if (in_sonarr) {print "    api_key: " sonarr_key; next}
     }
     {print}
-' "${SCRIPT_DIR}/../config/recyclarr.yml" > "$TEMP_CONFIG"
+' "${SCRIPT_DIR}/../config/recyclarr.yml.legacy" > "$TEMP_CONFIG"
 
 # Run Recyclarr with Docker
 docker run --rm \

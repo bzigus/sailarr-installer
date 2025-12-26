@@ -24,13 +24,18 @@ authentication:
 port: 3030
 
 triggers:
-  sonarr:
-    - name: sonarr # /triggers/sonarr
+  # MediaManager replaces both Sonarr and Radarr
+  mediamanager:
+    - name: mediamanager # /triggers/mediamanager
       priority: 1
-      
-  radarr:
-    - name: radarr # /triggers/radarr
-      priority: 1
+  
+  # Legacy triggers - kept for backwards compatibility if switching back
+  # sonarr:
+  #   - name: sonarr # /triggers/sonarr
+  #     priority: 1
+  # radarr:
+  #   - name: radarr # /triggers/radarr
+  #     priority: 1
 
 targets:
   jellyfin:

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Arr's Mount Healthcheck Script
-# Verifies that Radarr and Sonarr can access the rclone mount
-# If not, restarts the containers
+# Media Manager Mount Healthcheck Script
+# Verifies that MediaManager can access the rclone mount
+# If not, restarts the container
 
-LOG_FILE="/mediacenter/logs/arrs-mount-healthcheck.log"
+LOG_FILE="/mediacenter/logs/mediamanager-mount-healthcheck.log"
 TEST_FILE="/data/realdebrid-zurg/torrents/.healthcheck_test.txt"
 DOCKER_COMPOSE_DIR="/mediacenter/docker"
 
@@ -32,20 +32,12 @@ restart_container() {
     fi
 }
 
-# Check Radarr
-if ! check_container "radarr"; then
-    log "FAILED: Radarr cannot access $TEST_FILE"
-    restart_container "radarr"
+# Check MediaManager
+if ! check_container "mediamanager"; then
+    log "FAILED: MediaManager cannot access $TEST_FILE"
+    restart_container "mediamanager"
 else
-    log "OK: Radarr mount check passed"
-fi
-
-# Check Sonarr
-if ! check_container "sonarr"; then
-    log "FAILED: Sonarr cannot access $TEST_FILE"
-    restart_container "sonarr"
-else
-    log "OK: Sonarr mount check passed"
+    log "OK: MediaManager mount check passed"
 fi
 
 # Check Decypharr
