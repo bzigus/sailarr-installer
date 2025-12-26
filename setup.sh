@@ -713,6 +713,20 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Creating .env.local from .env.install..."
     cp "$DOCKER_DIR/.env.install" "$DOCKER_DIR/.env.local"
     echo "✓ .env.local created"
+    
+    # Copy MediaManager config template BEFORE starting containers
+    echo "Setting up MediaManager configuration..."
+    sudo cp "${SCRIPT_DIR}/config/mediamanager/config.toml" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    # Update MediaManager config with credentials (Prowlarr API key will be added after services start)
+    sudo sed -i "s|TOKEN_SECRET_PLACEHOLDER|${MEDIAMANAGER_TOKEN_SECRET}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    sudo sed -i "s|MEDIAMANAGER_DB_PASSWORD_PLACEHOLDER|${MEDIAMANAGER_DB_PASSWORD}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    # Set initial ownership and permissions
+    sudo chown -R mediamanager:mediacenter "${ROOT_DIR}/config/mediamanager-config"
+    sudo chmod 600 "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    log_success "MediaManager configuration template created"
 
     # Start services
     echo ""
@@ -887,24 +901,14 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_success "API keys retrieved"
     echo "  - Prowlarr: $PROWLARR_API_KEY"
 
-    # Update MediaManager config with Prowlarr API key
+    # Update MediaManager config with Prowlarr API key and domain
     echo ""
-    echo "Configuring MediaManager..."
+    echo "Updating MediaManager configuration with Prowlarr API key..."
     
-    # Copy MediaManager config template
-    sudo cp "${SCRIPT_DIR}/config/mediamanager/config.toml" "${ROOT_DIR}/config/mediamanager-config/config.toml"
-    
-    # Update MediaManager config with actual values (credentials already generated earlier)
-    sudo sed -i "s|TOKEN_SECRET_PLACEHOLDER|${MEDIAMANAGER_TOKEN_SECRET}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
-    sudo sed -i "s|MEDIAMANAGER_DB_PASSWORD_PLACEHOLDER|${MEDIAMANAGER_DB_PASSWORD}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
     sudo sed -i "s|PROWLARR_API_KEY_PLACEHOLDER|${PROWLARR_API_KEY}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
     sudo sed -i "s|http://localhost:8000|http://${DOMAIN_NAME}:8000|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
     
-    # Set permissions
-    sudo chown -R mediamanager:mediacenter "${ROOT_DIR}/config/mediamanager-config"
-    sudo chmod 600 "${ROOT_DIR}/config/mediamanager-config/config.toml"
-    
-    log_success "MediaManager configuration updated"
+    log_success "MediaManager configuration updated with Prowlarr integration"
 
 
         # Configure Prowlarr
