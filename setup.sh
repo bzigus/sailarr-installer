@@ -111,7 +111,7 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
     # Ask for authentication credentials (optional)
     echo "Service Authentication (Optional)"
     echo "----------------------------------"
-    echo "Configure username/password for Radarr, Sonarr, and Prowlarr web UI."
+    echo "Configure username/password for MediaManager and Prowlarr web UI."
     echo "Leave empty to skip and configure manually later."
     read -p "Do you want to configure authentication? (y/n): " -r
     echo ""
@@ -629,7 +629,7 @@ echo ""
 echo "========================================="
 echo "Mount Healthcheck Auto-Repair System"
 echo "========================================="
-echo "This system monitors if containers (Radarr, Sonarr, Decypharr, Jellyfin) can access"
+echo "This system monitors if containers (MediaManager, Decypharr, Jellyfin) can access"
 echo "the rclone mount and automatically restarts them if they lose access."
 echo ""
 read -p "Do you want to install the mount healthcheck auto-repair system? (y/n): " -r
@@ -639,13 +639,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Installing mount healthcheck scripts..."
 
     # Copy healthcheck scripts to /usr/local/bin/
-    sudo cp "$SCRIPT_DIR/scripts/health/arrs-mount-healthcheck.sh" /usr/local/bin/
+    sudo cp "$SCRIPT_DIR/scripts/health/mediamanager-mount-healthcheck.sh" /usr/local/bin/
     sudo cp "$SCRIPT_DIR/scripts/health/jellyfin-mount-healthcheck.sh" /usr/local/bin/
 
     # Set permissions
-    sudo chmod 775 /usr/local/bin/arrs-mount-healthcheck.sh
+    sudo chmod 775 /usr/local/bin/mediamanager-mount-healthcheck.sh
     sudo chmod 775 /usr/local/bin/jellyfin-mount-healthcheck.sh
-    sudo chown $USER:$USER /usr/local/bin/arrs-mount-healthcheck.sh
+    sudo chown $USER:$USER /usr/local/bin/mediamanager-mount-healthcheck.sh
     sudo chown $USER:$USER /usr/local/bin/jellyfin-mount-healthcheck.sh
 
     # Create logs directory
@@ -662,12 +662,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Add cron jobs if they don't already exist
-        (crontab -l 2>/dev/null | grep -v "arrs-mount-healthcheck"; echo "*/30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh") | crontab -
+        (crontab -l 2>/dev/null | grep -v "mediamanager-mount-healthcheck"; echo "*/30 * * * * /usr/local/bin/mediamanager-mount-healthcheck.sh") | crontab -
         (crontab -l 2>/dev/null | grep -v "jellyfin-mount-healthcheck"; echo "*/35 * * * * /usr/local/bin/jellyfin-mount-healthcheck.sh") | crontab -
         echo "✓ Cron jobs added successfully"
     else
         echo "Skipping cron job configuration. You can add them manually later:"
-        echo "  */30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh"
+        echo "  */30 * * * * /usr/local/bin/mediamanager-mount-healthcheck.sh"
         echo "  */35 * * * * /usr/local/bin/jellyfin-mount-healthcheck.sh"
     fi
 else
@@ -683,7 +683,7 @@ echo "========================================="
 echo "Auto-Configuration via API"
 echo "========================================="
 echo ""
-read -p "Do you want to auto-configure Radarr, Sonarr, and Prowlarr? (y/n): " -r
+read -p "Do you want to auto-configure MediaManager and Prowlarr? (y/n): " -r
 echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -692,6 +692,18 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # Determine docker directory location
     DOCKER_DIR="${ROOT_DIR}/docker"
+
+    # Generate MediaManager credentials BEFORE starting services
+    echo "Generating MediaManager credentials..."
+    MEDIAMANAGER_TOKEN_SECRET=$(openssl rand -hex 32)
+    MEDIAMANAGER_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+    
+    # Write credentials to .env.install first
+    echo "" >> "$DOCKER_DIR/.env.install"
+    echo "# API Keys and Credentials (auto-generated during setup)" >> "$DOCKER_DIR/.env.install"
+    echo "MEDIAMANAGER_TOKEN_SECRET=$MEDIAMANAGER_TOKEN_SECRET" >> "$DOCKER_DIR/.env.install"
+    echo "MEDIAMANAGER_DB_PASSWORD=$MEDIAMANAGER_DB_PASSWORD" >> "$DOCKER_DIR/.env.install"
+    echo "✓ MediaManager credentials generated"
 
     # Generate .env.local from .env.install for docker compose
     echo "Creating .env.local from .env.install..."
@@ -835,9 +847,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         wait_for_service "Traefik" "http://localhost:8080/api/version"
     fi
 
-    wait_for_service "Radarr" "http://localhost:7878"
-    wait_for_service "Sonarr" "http://localhost:8989"
     wait_for_service "Prowlarr" "http://localhost:9696"
+    wait_for_service "MediaManager" "http://localhost:8000"
 
     # Skip Zilean wait - it can take 10-30 minutes to import DMM data on first run
     echo "Zilean starting in background (will import DMM data, can take 10-30 minutes)"
@@ -872,18 +883,14 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_success "API keys retrieved"
     echo "  - Prowlarr: $PROWLARR_API_KEY"
 
-    # Generate MediaManager credentials
+    # Update MediaManager config with Prowlarr API key
     echo ""
-    echo "Generating MediaManager configuration..."
-    
-    # Generate random token secret for MediaManager
-    MEDIAMANAGER_TOKEN_SECRET=$(openssl rand -hex 32)
-    MEDIAMANAGER_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+    echo "Configuring MediaManager..."
     
     # Copy MediaManager config template
     sudo cp "${SCRIPT_DIR}/config/mediamanager/config.toml" "${ROOT_DIR}/config/mediamanager-config/config.toml"
     
-    # Update MediaManager config with actual values
+    # Update MediaManager config with actual values (credentials already generated earlier)
     sudo sed -i "s|TOKEN_SECRET_PLACEHOLDER|${MEDIAMANAGER_TOKEN_SECRET}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
     sudo sed -i "s|MEDIAMANAGER_DB_PASSWORD_PLACEHOLDER|${MEDIAMANAGER_DB_PASSWORD}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
     sudo sed -i "s|PROWLARR_API_KEY_PLACEHOLDER|${PROWLARR_API_KEY}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
@@ -893,7 +900,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo chown -R mediamanager:mediacenter "${ROOT_DIR}/config/mediamanager-config"
     sudo chmod 600 "${ROOT_DIR}/config/mediamanager-config/config.toml"
     
-    log_success "MediaManager configuration created"
+    log_success "MediaManager configuration updated"
 
 
         # Configure Prowlarr
@@ -1012,8 +1019,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "" >> "$DOCKER_DIR/.env.install"
         echo "# API Keys and Credentials (auto-generated during setup)" >> "$DOCKER_DIR/.env.install"
         echo "PROWLARR_API_KEY=$PROWLARR_API_KEY" >> "$DOCKER_DIR/.env.install"
-        echo "MEDIAMANAGER_TOKEN_SECRET=$MEDIAMANAGER_TOKEN_SECRET" >> "$DOCKER_DIR/.env.install"
-        echo "MEDIAMANAGER_DB_PASSWORD=$MEDIAMANAGER_DB_PASSWORD" >> "$DOCKER_DIR/.env.install"
 
         echo ""
         echo "✓ Auto-configuration completed successfully"
