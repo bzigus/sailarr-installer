@@ -151,6 +151,7 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
     if [[ $REPLY =~ ^[Nn]$ ]]; then
         TRAEFIK_ENABLED=false
         USER_DOMAIN="localhost"
+        LETSENCRYPT_EMAIL=""
         echo "Traefik disabled - services will use direct port access"
     else
         TRAEFIK_ENABLED=true
@@ -160,10 +161,22 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
         # Ask for domain name (only if Traefik is enabled)
         echo "Domain/Hostname Configuration"
         echo "------------------------------"
-        echo "This will be used for Traefik routing (e.g., radarr.yourdomain.local)"
+        echo "This will be used for Traefik routing (e.g., radarr.yourdomain.com)"
         echo "Current default: ${DOMAIN_NAME:-mediacenter.local}"
         read -p "Enter domain/hostname [press Enter for default]: " USER_DOMAIN
         USER_DOMAIN=${USER_DOMAIN:-${DOMAIN_NAME:-mediacenter.local}}
+        echo ""
+
+        # Ask for Let's Encrypt email (only if Traefik is enabled)
+        echo "Let's Encrypt Email Configuration"
+        echo "----------------------------------"
+        echo "This email will be used for Let's Encrypt SSL certificates."
+        echo "You'll receive notifications about certificate expiration."
+        read -p "Enter your email address: " LETSENCRYPT_EMAIL
+        while [[ ! "$LETSENCRYPT_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; do
+            echo "Invalid email format. Please try again."
+            read -p "Enter your email address: " LETSENCRYPT_EMAIL
+        done
     fi
     echo ""
 
@@ -277,6 +290,7 @@ TRAEFIK_ENABLED=$TRAEFIK_ENABLED
 # DNS/DOMAIN CONFIGURATION
 # =============================================================================
 DOMAIN_NAME=$USER_DOMAIN
+LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-}
 
 # =============================================================================
 # SYSTEM CONFIGURATION - UIDs/GIDs
@@ -326,6 +340,9 @@ echo "Installation directory: ${ROOT_DIR}"
 echo "Docker configuration:   $SCRIPT_DIR/docker/"
 echo "Timezone:              ${TIMEZONE}"
 echo "Domain:                ${DOMAIN_NAME}"
+if [[ "$TRAEFIK_ENABLED" == "true" ]]; then
+    echo "Let's Encrypt email:   ${LETSENCRYPT_EMAIL}"
+fi
 echo ""
 echo "CREDENTIALS"
 echo "-----------"
@@ -1218,12 +1235,12 @@ echo ""
 echo "Next steps:"
 echo "1. All services are now running! You can access them at:"
 if [ "$TRAEFIK_ENABLED" = true ]; then
-    echo "   • Traefik Dashboard: http://${DOMAIN_NAME}:8080"
-    echo "   • Prowlarr:   http://prowlarr.${DOMAIN_NAME}  (already configured!)"
-    echo "   • Radarr:     http://radarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Sonarr:     http://sonarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Jellyseerr: http://jellyseerr.${DOMAIN_NAME}"
-    echo "   • Jellyfin:   http://${DOMAIN_NAME}:8096/web"
+    echo "   • Traefik Dashboard: https://traefik.${DOMAIN_NAME}"
+    echo "   • Prowlarr:   https://prowlarr.${DOMAIN_NAME}  (already configured!)"
+    echo "   • Radarr:     https://radarr.${DOMAIN_NAME}    (already configured!)"
+    echo "   • Sonarr:     https://sonarr.${DOMAIN_NAME}    (already configured!)"
+    echo "   • Jellyseerr: https://jellyseerr.${DOMAIN_NAME}"
+    echo "   • Jellyfin:   https://jellyfin.${DOMAIN_NAME}"
 else
     echo "   • Prowlarr:   http://${DOMAIN_NAME}:9696  (already configured!)"
     echo "   • Radarr:     http://${DOMAIN_NAME}:7878  (already configured!)"

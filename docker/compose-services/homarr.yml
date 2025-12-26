@@ -39,7 +39,8 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.homarr.rule=Host(`${HOMARR_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-    - traefik.http.routers.homarr.entrypoints=web
+    - traefik.http.routers.homarr.entrypoints=websecure
+    - traefik.http.routers.homarr.tls.certresolver=letsencrypt
     - traefik.http.services.homarr.loadbalancer.server.port=3000
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro

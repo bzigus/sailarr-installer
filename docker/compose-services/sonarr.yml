@@ -45,5 +45,6 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.sonarr.rule=Host(`${SONARR_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-    - traefik.http.routers.sonarr.entrypoints=web
+    - traefik.http.routers.sonarr.entrypoints=websecure
+    - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
     - traefik.http.services.sonarr.loadbalancer.server.port=8989

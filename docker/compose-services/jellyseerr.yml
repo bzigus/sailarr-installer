@@ -39,7 +39,8 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.jellyseerr.rule=Host(`${JELLYSEERR_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-    - traefik.http.routers.jellyseerr.entrypoints=web
+    - traefik.http.routers.jellyseerr.entrypoints=websecure
+    - traefik.http.routers.jellyseerr.tls.certresolver=letsencrypt
     - traefik.http.services.jellyseerr.loadbalancer.server.port=5055
     depends_on:
       sonarr:

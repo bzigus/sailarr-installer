@@ -76,7 +76,7 @@ The system uses a **symlink-based architecture** optimized for hardlinking:
 ### Services List
 
 **Core Media Stack:**
-- **Jellyfin** - Media server (host network mode, port 8096)
+- **Jellyfin** - Media server (bridge network mode, port 8096)
 - **Jellyseerr** - Request management interface (port 5055)
 - **Radarr** - Movie management (port 7878)
 - **Sonarr** - TV show management (port 8989)
