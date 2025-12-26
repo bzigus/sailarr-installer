@@ -92,7 +92,7 @@ user = ""
 enabled = true
 host = "http://decypharr"
 port = 8283
-username = "http://mediamanager:8000"
+username = ""
 password = "PROWLARR_API_KEY_PLACEHOLDER"
 
 # Transmission settings
