@@ -347,10 +347,15 @@ echo "  - mediacenter (GID: ${MEDIACENTER_GID})"
 echo ""
 echo "DIRECTORIES TO BE CREATED"
 echo "-------------------------"
-echo "  - ${ROOT_DIR}/config/{mediamanager,mediamanager-postgres,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr}-config"
+echo "  - ${ROOT_DIR}/config/{mediamanager,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr}-config"
 echo "  - ${ROOT_DIR}/data/realdebrid-zurg"
 echo "  - ${ROOT_DIR}/data/media/{movies,tv}"
 echo "  - ${ROOT_DIR}/data/images"
+echo ""
+echo "DOCKER VOLUMES TO BE CREATED"
+echo "----------------------------"
+echo "  - mediamanager_postgres (PostgreSQL data)"
+echo "  - zilean_postgres (Zilean database)"
 echo ""
 echo "ADDITIONAL TASKS"
 echo "----------------"
@@ -403,7 +408,7 @@ add_user_to_group $USER mediacenter
 # Create directories
 echo ""
 echo "Creating directory structure..."
-sudo mkdir -pv "${ROOT_DIR}/config"/{mediamanager,mediamanager-postgres,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr,pinchflat}-config
+sudo mkdir -pv "${ROOT_DIR}/config"/{mediamanager,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr,pinchflat}-config
 sudo mkdir -pv "${ROOT_DIR}/data/realdebrid-zurg"
 sudo mkdir -pv "${ROOT_DIR}/data/media"/{movies,tv}
 sudo mkdir -pv "${ROOT_DIR}/data/images"
@@ -418,7 +423,6 @@ sudo chmod -R a=,a+rX,u+w,g+w ${ROOT_DIR}/config/
 sudo chown -R $INSTALL_UID:mediacenter ${ROOT_DIR}/data/
 sudo chown -R $INSTALL_UID:mediacenter ${ROOT_DIR}/config/
 sudo chown -R mediamanager:mediacenter ${ROOT_DIR}/config/mediamanager-config
-sudo chown -R $INSTALL_UID:mediacenter ${ROOT_DIR}/config/mediamanager-postgres
 sudo chown -R recyclarr:mediacenter ${ROOT_DIR}/config/recyclarr-config
 sudo chown -R prowlarr:mediacenter ${ROOT_DIR}/config/prowlarr-config
 sudo chown -R jellyseerr:mediacenter ${ROOT_DIR}/config/jellyseerr-config

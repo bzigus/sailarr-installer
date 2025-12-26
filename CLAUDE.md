@@ -109,7 +109,6 @@ ${ROOT_DIR}/
 │   ├── jellyfin-config/
 │   ├── jellyfin-cache/
 │   ├── mediamanager-config/
-│   ├── mediamanager-postgres/
 │   ├── prowlarr-config/
 │   ├── jellyseerr-config/
 │   ├── zilean-config/
@@ -127,6 +126,11 @@ ${ROOT_DIR}/
 │   ├── images/          # MediaManager images
 │   └── realdebrid-zurg/ # Rclone mount point
 └── logs/                # Health check logs
+
+Docker Volumes (managed by Docker):
+├── mediamanager_postgres/  # MediaManager PostgreSQL data
+├── zilean_postgres/        # Zilean PostgreSQL data
+└── zurg_data/              # Zurg data
 ```
 
 ### Repository Structure
