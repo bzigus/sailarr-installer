@@ -21,8 +21,10 @@ include:
   - compose-services/jellyseerr.yml
   
   # Media Management
-  - compose-services/radarr.yml
-  - compose-services/sonarr.yml
+  - compose-services/mediamanager.yml
+  # Legacy *Arr services - comment out mediamanager.yml and uncomment below to restore
+  # - compose-services/radarr.yml
+  # - compose-services/sonarr.yml
   - compose-services/prowlarr.yml
   
   # Download & Streaming
