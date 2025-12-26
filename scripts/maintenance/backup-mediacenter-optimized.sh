@@ -102,19 +102,17 @@ mkdir -p "${BACKUP_DIR}/data/media/movies"
 mkdir -p "${BACKUP_DIR}/data/media/tv"
 mkdir -p "${BACKUP_DIR}/data/media/youtube"
 mkdir -p "${BACKUP_DIR}/data/realdebrid-zurg"
-mkdir -p "${BACKUP_DIR}/data/symlinks/radarr"
-mkdir -p "${BACKUP_DIR}/data/symlinks/sonarr"
 touch "${BACKUP_DIR}/data/media/.gitkeep"
 touch "${BACKUP_DIR}/data/realdebrid-zurg/.gitkeep"
 
 # 5. Backup system user configuration info
 echo "   → System users information"
 getent group mediacenter > "${BACKUP_DIR}/mediacenter-group.txt" 2>/dev/null || echo "Group mediacenter not found" > "${BACKUP_DIR}/mediacenter-group.txt"
-getent passwd | grep -E '^(rclone|sonarr|radarr|prowlarr|jellyseerr|jellyfin|recyclarr|rdtclient|autoscan|traefik|pinchflat|jellystat|homarr|dashdot):' > "${BACKUP_DIR}/mediacenter-users.txt" 2>/dev/null || echo "No mediacenter users found" > "${BACKUP_DIR}/mediacenter-users.txt"
+getent passwd | grep -E '^(rclone|mediamanager|prowlarr|jellyseerr|jellyfin|rdtclient|autoscan|traefik|pinchflat|jellystat|homarr|dashdot):' > "${BACKUP_DIR}/mediacenter-users.txt" 2>/dev/null || echo "No mediacenter users found" > "${BACKUP_DIR}/mediacenter-users.txt"
 
 # 6. Docker images list
 echo "   → Docker images list"
-docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}" | grep -E "(mediacenter|traefik|jellyfin|jellyseerr|prowlarr|sonarr|radarr|zurg|zilean|rclone|autoscan|homarr|dashdot|recyclarr|rdtclient|pinchflat|jellystat|watchtower|postgres)" > "${BACKUP_DIR}/docker-images.txt" 2>/dev/null || echo "No mediacenter images found" > "${BACKUP_DIR}/docker-images.txt"
+docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}" | grep -E "(mediacenter|traefik|jellyfin|jellyseerr|prowlarr|mediamanager|zurg|zilean|rclone|autoscan|homarr|dashdot|rdtclient|pinchflat|jellystat|watchtower|postgres)" > "${BACKUP_DIR}/docker-images.txt" 2>/dev/null || echo "No mediacenter images found" > "${BACKUP_DIR}/docker-images.txt"
 
 # 7. Create restore instructions
 cat > "${BACKUP_DIR}/RESTORE-INSTRUCTIONS.md" << 'EOF'
@@ -146,7 +144,7 @@ These will be regenerated automatically when services start.
    sudo cp setup.sh zurg.yml CLAUDE.md /mnt/mediacenter/
    
    # Restore directory structure
-   sudo mkdir -p /mediacenter/data/{media/{movies,tv,youtube},realdebrid-zurg,symlinks/{radarr,sonarr}}
+   sudo mkdir -p /mediacenter/data/{media/{movies,tv,youtube},realdebrid-zurg}
    ```
 
 3. **Recreate system users:**
@@ -156,8 +154,7 @@ These will be regenerated automatically when services start.
    
    # Create users (check mediacenter-users.txt for full list)
    sudo useradd -u 13001 -g 13000 -M -s /sbin/nologin rclone
-   sudo useradd -u 13002 -g 13000 -M -s /sbin/nologin sonarr  
-   sudo useradd -u 13003 -g 13000 -M -s /sbin/nologin radarr
+   sudo useradd -u 13002 -g 13000 -M -s /sbin/nologin mediamanager  
    # ... (continue with all users from mediacenter-users.txt)
    ```
 
