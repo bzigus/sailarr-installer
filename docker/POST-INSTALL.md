@@ -7,8 +7,7 @@ This guide covers the manual configuration steps required after running the auto
 1. [Jellyseerr Configuration](#jellyseerr-configuration)
    - [Connect Jellyfin Account](#1-connect-jellyfin-account)
    - [Select Libraries](#2-select-libraries)
-   - [Add Radarr Server](#3-add-radarr-server)
-   - [Add Sonarr Server](#4-add-sonarr-server)
+   - [Configure MediaManager](#3-configure-mediamanager)
 2. [Additional Services](#additional-services)
 3. [Troubleshooting](#troubleshooting)
 
@@ -16,7 +15,7 @@ This guide covers the manual configuration steps required after running the auto
 
 ## Jellyseerr Configuration
 
-Jellyseerr is your media request management system that connects to Jellyfin, Radarr, and Sonarr.
+Jellyseerr is your media request management system that connects to Jellyfin and MediaManager.
 
 ### Access Jellyseerr
 
@@ -44,110 +43,76 @@ Jellyseerr is your media request management system that connects to Jellyfin, Ra
   - ☑ **TV Shows** (your Jellyfin TV Shows library)
 - Click **Continue**
 
-### 3. Add Radarr Server
+### 3. Configure MediaManager
 
-**Step 4: Radarr Configuration**
+**Step 4: MediaManager Setup**
 
-When you reach the "Add Radarr Server" screen, fill in the following:
+MediaManager is the unified media management system that replaces Radarr and Sonarr. It handles both movies and TV shows in a single interface.
 
-| Field | Value | Notes |
-|-------|-------|-------|
-| **Default Server** | ☑ Enabled | Check this box |
-| **4K Server** | ☐ Disabled | Uncheck (unless using separate 4K setup) |
-| **Server Name** | `Radarr` | Any friendly name |
-| **Hostname or IP Address** | `http://radarr` | Use container name (no external IP needed) |
-| **Port** | `7878` | Default Radarr port |
-| **Use SSL** | ☐ Disabled | Not needed for internal communication |
-| **API Key** | (auto-filled below) | Automatically extracted from installation |
-| **URL Base** | (leave empty) | Not needed for default setup |
-| **Quality Profile** | `Recyclarr-Any` | Or choose `Recyclarr-1080p` / `Recyclarr-2160p` |
-| **Root Folder** | `/data/media/movies` | Should auto-populate after test |
-| **Minimum Availability** | `Released` | Recommended |
-| **Tags** | (leave empty) | Optional |
-| **External URL** | (leave empty) | Only needed for external access |
-| **Enable Scan** | ☑ Enabled | Recommended |
-| **Enable Automatic Search** | ☑ Enabled | Recommended |
-| **Tag Requests** | ☑ Enabled | Adds requester info to downloads |
+**Access MediaManager:**
+- URL: `http://YOUR_SERVER_IP:8000`
+- First time? You'll need to create an admin account
 
-**Radarr API Key:**
+**Initial Configuration:**
 
-The installer displays the API key at the end of the installation. If you need to retrieve it:
+1. **Create Admin Account** (first login only)
+   - Use the email configured during installation (from `.env.install`)
+   - Set a secure password
+   - This account will have full administrative access
 
-```bash
-# On your server:
-docker exec radarr cat /config/config.xml | grep -oP '(?<=<ApiKey>)[^<]+'
-```
+2. **Configure Torrent Client**
+   - Navigate to Settings → Torrent Clients
+   - Decypharr is already pre-configured, verify the settings:
+     - Type: `qBittorrent`
+     - Host: `http://decypharr`
+     - Port: `8283`
+     - Username: `http://mediamanager:8000`
+     - Password: Your MediaManager API key (auto-configured)
 
-Or find it in the installation summary printed at the end of `./setup.sh`.
+3. **Configure Indexers**
+   - Navigate to Settings → Indexers
+   - Prowlarr is already configured with:
+     - URL: `http://prowlarr:9696`
+     - API Key: (auto-configured during installation)
+   - Indexers include: Zilean, Torrentio, 1337x, TPB, YTS, EZTV
 
-**Recommended Settings:**
-- **Quality Profile**:
-  - `Recyclarr-Any` - Best for most users (accepts any quality, upgrades to best)
-  - `Recyclarr-1080p` - For 1080p content only
-  - `Recyclarr-2160p` - For 4K content only
-- **Minimum Availability**: `Released` (downloads when released, not announced)
+4. **Configure Libraries**
+   - Navigate to Settings → Libraries
+   - Default libraries are pre-configured:
+     - **Movies**: `/data/media/movies`
+     - **TV Shows**: `/data/media/tv`
+   - You can add custom libraries if needed
 
-**Before clicking "Add Server":**
-1. Click **"Test"** button to verify connection
-2. If successful, the Root Folder dropdown will populate
-3. Select `/data/media/movies`
-4. Click **"Add Server"**
+5. **Configure Quality & Scoring**
+   - Navigate to Settings → Indexers → Scoring Rules
+   - Default rules are configured:
+     - Prefer H.265/HEVC codec
+     - Avoid CAM/TS releases
+     - Reject nuked releases
+   - Customize as needed for your preferences
 
-### 4. Add Sonarr Server
+**Integration with Jellyseerr:**
 
-**Step 5: Sonarr Configuration**
+Jellyseerr doesn't directly integrate with MediaManager yet. For now, use MediaManager's web interface to:
+1. Search for movies/TV shows
+2. Add them to your library
+3. Monitor downloads and imports
 
-Click **"Add Sonarr Server"** and fill in:
+MediaManager will automatically:
+- Search indexers via Prowlarr
+- Download torrents via Decypharr to Real-Debrid
+- Import media to `/data/media/movies` or `/data/media/tv`
+- Trigger Jellyfin library updates via Autoscan
 
-| Field | Value | Notes |
-|-------|-------|-------|
-| **Default Server** | ☑ Enabled | Check this box |
-| **4K Server** | ☐ Disabled | Uncheck (unless using separate 4K setup) |
-| **Server Name** | `Sonarr` | Any friendly name |
-| **Hostname or IP Address** | `http://sonarr` | Use container name |
-| **Port** | `8989` | Default Sonarr port |
-| **Use SSL** | ☐ Disabled | Not needed for internal communication |
-| **API Key** | (auto-filled below) | Automatically extracted from installation |
-| **URL Base** | (leave empty) | Not needed for default setup |
-| **Series Type** | `Standard` | For regular TV shows (not anime) |
-| **Quality Profile** | `Recyclarr-Any` | Or choose `Recyclarr-1080p` / `Recyclarr-2160p` |
-| **Root Folder** | `/data/media/tv` | Should auto-populate after test |
-| **Language Profile** | `English` | Default |
-| **Tags** | (leave empty) | Optional - test connection first to load |
-| **Anime Series Type** | (leave empty) | Only if you watch anime |
-| **Anime Quality Profile** | (leave empty) | Only if you watch anime |
-| **Anime Root Folder** | (leave empty) | Only if you watch anime |
-| **Anime Language Profile** | (leave empty) | Only if you watch anime |
-| **Anime Tags** | (leave empty) | Only if you watch anime |
-| **Season Folders** | ☑ Enabled | Recommended - organizes by season |
-| **External URL** | (leave empty) | Only needed for external access |
-| **Enable Scan** | ☑ Enabled | Recommended |
-| **Enable Automatic Search** | ☑ Enabled | Recommended |
-| **Tag Requests** | ☑ Enabled | Adds requester info to downloads |
+### 4. Finish Setup
 
-**Sonarr API Key:**
+**Step 5: Complete Configuration**
+- Jellyseerr is configured with Jellyfin
+- MediaManager is configured with indexers and download client
+- You're ready to start adding media!
 
-The installer displays the API key at the end of the installation. If you need to retrieve it:
-
-```bash
-# On your server:
-docker exec sonarr cat /config/config.xml | grep -oP '(?<=<ApiKey>)[^<]+'
-```
-
-Or find it in the installation summary printed at the end of `./setup.sh`.
-
-**Before clicking "Add Server":**
-1. Click **"Test"** button to verify connection
-2. If successful, the Root Folder dropdown will populate
-3. Select `/data/media/tv`
-4. Click **"Add Server"**
-
-### 5. Finish Setup
-
-**Step 6: Complete Jellyseerr Setup**
-- Review your settings
-- Click **"Finish Setup"**
-- Jellyseerr is now ready to use!
+**Note on Jellyseerr**: 
+Since MediaManager is a newer service, Jellyseerr integration is not yet available. You can still use Jellyseerr for managing requests, but you'll need to manually add content in MediaManager. Alternatively, use MediaManager directly for searching and adding content.
 
 ---
 
@@ -174,8 +139,7 @@ Homarr provides a unified dashboard for all your services. No additional configu
 
 Already configured during installation with:
 - ✅ Zilean indexer added
-- ✅ Radarr connection configured
-- ✅ Sonarr connection configured
+- ✅ MediaManager integration configured via API
 - ✅ Automatic indexer sync enabled
 
 No additional configuration needed unless you want to add more indexers.
@@ -188,8 +152,7 @@ No additional configuration needed unless you want to add more indexers.
 |---------|-----|---------|
 | **Jellyseerr** | `http://YOUR_SERVER_IP:5055` | Media requests |
 | **Jellyfin** | `http://YOUR_SERVER_IP:8096/web` | Media server |
-| **Radarr** | `http://YOUR_SERVER_IP:7878` | Movie management |
-| **Sonarr** | `http://YOUR_SERVER_IP:8989` | TV show management |
+| **MediaManager** | `http://YOUR_SERVER_IP:8000` | Media management |
 | **Prowlarr** | `http://YOUR_SERVER_IP:9696` | Indexer management |
 | **Homarr** | `http://YOUR_SERVER_IP:7575` | Dashboard |
 | **Jellystat** | `http://YOUR_SERVER_IP:3210` | Jellyfin analytics |
@@ -199,29 +162,25 @@ No additional configuration needed unless you want to add more indexers.
 
 ## Troubleshooting
 
-### Jellyseerr Can't Connect to Radarr/Sonarr
+### Jellyseerr Can't Connect to Services
 
 **Problem**: Test button fails with connection error
 
 **Solutions**:
 1. Verify the service is running:
    ```bash
-   docker ps | grep radarr
-   docker ps | grep sonarr
+   docker ps | grep mediamanager
+   docker ps | grep prowlarr
    ```
 
-2. Check the API key is correct:
+2. Check MediaManager is accessible:
    ```bash
-   # For Radarr:
-   docker exec radarr cat /config/config.xml | grep ApiKey
-
-   # For Sonarr:
-   docker exec sonarr cat /config/config.xml | grep ApiKey
+   curl http://localhost:8000/health
    ```
 
 3. Verify hostname is correct:
-   - Use `http://radarr` (not `http://localhost` or IP address)
-   - Use `http://sonarr` (not `http://localhost` or IP address)
+   - Use `http://mediamanager` for MediaManager (not `http://localhost` or IP address)
+   - Use container names for internal communication
 
 4. Check Docker network:
    ```bash
@@ -240,9 +199,8 @@ No additional configuration needed unless you want to add more indexers.
 
 **Solution**:
 1. The connection test must succeed first
-2. Verify the root folder exists in Radarr/Sonarr:
-   - Radarr: `http://YOUR_SERVER_IP:7878/settings/mediamanagement`
-   - Sonarr: `http://YOUR_SERVER_IP:8989/settings/mediamanagement`
+2. Verify the root folder exists in MediaManager:
+   - MediaManager: `http://YOUR_SERVER_IP:8000/settings/libraries`
 
 ### Can't Sign in with Jellyfin
 
@@ -273,8 +231,8 @@ If you encounter issues:
 1. Check service logs:
    ```bash
    docker logs jellyseerr
-   docker logs radarr
-   docker logs sonarr
+   docker logs mediamanager
+   docker logs prowlarr
    ```
 
 2. Verify all services are healthy:
@@ -295,4 +253,4 @@ If you encounter issues:
 
 **Configuration complete!** 🎉
 
-You can now start requesting media through Jellyseerr. Movies and TV shows will be automatically downloaded and organized by Radarr/Sonarr.
+You can now start managing your media library through MediaManager. Content will be automatically downloaded and organized, then available in Jellyfin.
