@@ -21,8 +21,8 @@ include:
   - compose-services/jellyseerr.yml
   
   # Media Management
-  - compose-services/radarr.yml
-  - compose-services/sonarr.yml
+  - compose-services/mediamanager.yml
+  - compose-services/mediamanager-postgres.yml
   - compose-services/prowlarr.yml
   
   # Download & Streaming
