@@ -155,17 +155,17 @@ After the automated installation completes, some services require manual configu
 
 **📖 See [docker/POST-INSTALL.md](docker/POST-INSTALL.md) for detailed step-by-step instructions on:**
 
-- **Overseerr Setup** - Connect Plex account, select libraries, and add Radarr/Sonarr servers
-- **Tautulli Setup** - Connect to Plex for analytics and monitoring
+- **Jellyseerr Setup** - Connect Jellyfin account, select libraries, and add Radarr/Sonarr servers
+- **Jellystat Setup** - Connect to Jellyfin for analytics and monitoring
 - **Additional Configuration** - Optional tweaks and customizations
 
-The automated installer handles 95% of the setup, but these services need your Plex account credentials or user preferences that can't be automated.
+The automated installer handles 95% of the setup, but these services need your Jellyfin account credentials or user preferences that can't be automated.
 
 ## How It Works
 
 The workflow is completely automated:
 
-1. **Request** content through Overseerr
+1. **Request** content through Jellyseerr
 2. **Search** - Radarr/Sonarr search indexers via Prowlarr
 3. **Find** - Zilean provides cached torrents from Debrid Media Manager
 4. **Add** - Decypharr adds torrent to Real-Debrid
@@ -173,8 +173,8 @@ The workflow is completely automated:
 6. **Access** - Rclone mounts Zurg as local filesystem
 7. **Link** - Decypharr creates symlinks to mounted files
 8. **Import** - Radarr/Sonarr import the symlinks
-9. **Scan** - Autoscan triggers Plex library refresh
-10. **Stream** - Watch instantly through Plex
+9. **Scan** - Autoscan triggers Jellyfin library refresh
+10. **Stream** - Watch instantly through Jellyfin
 
 No actual downloading to local storage - everything streams from Real-Debrid.
 
@@ -235,16 +235,17 @@ cd /YOUR_INSTALL_DIR
 ```
 /YOUR_INSTALL_DIR/
 ├── config/              # Application configurations
-│   ├── plex-config/
+│   ├── jellyfin-config/
+│   ├── jellyfin-cache/
 │   ├── radarr-config/
 │   ├── sonarr-config/
 │   ├── prowlarr-config/
-│   ├── overseerr-config/
+│   ├── jellyseerr-config/
 │   ├── zilean-config/
 │   ├── zurg-config/
 │   ├── autoscan-config/
 │   ├── decypharr-config/
-│   ├── tautulli-config/
+│   ├── jellystat-config/
 │   ├── homarr-config/
 │   ├── dashdot-config/
 │   ├── pinchflat-config/
@@ -254,7 +255,8 @@ cd /YOUR_INSTALL_DIR
 │   ├── media/
 │   │   ├── movies/    # Radarr movies
 │   │   └── tv/        # Sonarr TV shows
-│   ├── torrents/      # Download client symlinks
+│   │   ├── radarr/    # Radarr symlinks
+│   │   └── sonarr/    # Sonarr symlinks
 │   └── realdebrid-zurg/ # Rclone mount point
 ├── logs/              # Health check logs
 ├── docker/            # Docker Compose files
@@ -268,7 +270,7 @@ cd /YOUR_INSTALL_DIR
 ├── scripts/          # Maintenance scripts
 │   ├── health/      # Health check scripts
 │   │   ├── arrs-mount-healthcheck.sh
-│   │   └── plex-mount-healthcheck.sh
+│   │   └── jellyfin-mount-healthcheck.sh
 │   ├── maintenance/ # Backup scripts
 │   └── recyclarr-sync.sh
 ├── config/           # Configuration templates
@@ -294,7 +296,7 @@ docker ps -a
 docker logs <container_name>
 
 # Examples:
-docker logs plex
+docker logs jellyfin
 docker logs radarr
 docker logs zurg
 ```
@@ -307,7 +309,7 @@ docker compose restart
 
 ### Check Mount Health
 ```bash
-tail -f /YOUR_INSTALL_DIR/logs/plex-mount-healthcheck.log
+tail -f /YOUR_INSTALL_DIR/logs/jellyfin-mount-healthcheck.log
 tail -f /YOUR_INSTALL_DIR/logs/arrs-mount-healthcheck.log
 ```
 
@@ -370,15 +372,15 @@ docker restart <container_name>
 The installer sets up automatic health checks that monitor critical mounts:
 
 **How it works:**
-- **Plex health check:** Runs every 35 minutes, verifies `/data/realdebrid-zurg` is accessible
+- **Jellyfin health check:** Runs every 35 minutes, verifies `/data/realdebrid-zurg` is accessible
 - **Arrs health check:** Runs every 30 minutes, verifies mounts for Radarr, Sonarr, and Decypharr
 - **Auto-recovery:** If a mount fails, the affected container is automatically restarted
 - **Logging:** All checks are logged to `/YOUR_INSTALL_DIR/logs/`
 
 **View health check logs:**
 ```bash
-# Plex mount health
-tail -f /YOUR_INSTALL_DIR/logs/plex-mount-healthcheck.log
+# Jellyfin mount health
+tail -f /YOUR_INSTALL_DIR/logs/jellyfin-mount-healthcheck.log
 
 # Arrs mount health
 tail -f /YOUR_INSTALL_DIR/logs/arrs-mount-healthcheck.log
@@ -391,7 +393,7 @@ crontab -l | grep healthcheck
 
 **Manually run health checks:**
 ```bash
-/YOUR_INSTALL_DIR/scripts/health/plex-mount-healthcheck.sh
+/YOUR_INSTALL_DIR/scripts/health/jellyfin-mount-healthcheck.sh
 /YOUR_INSTALL_DIR/scripts/health/arrs-mount-healthcheck.sh
 ```
 
@@ -461,7 +463,7 @@ This project builds upon the excellent work of many in the community:
 - **[Debrid Media Manager](https://github.com/debridmediamanager/debrid-media-manager)** - Torrent caching platform
 - **[dreulavelle/Prowlarr-Indexers](https://github.com/dreulavelle/Prowlarr-Indexers)** - Custom Prowlarr indexer definitions
 
-And all the developers of the tools in this stack: Plex, Radarr, Sonarr, Prowlarr, Overseerr, Zurg, Rclone, Zilean, Decypharr, RDTClient, Autoscan, Traefik, Watchtower, Tautulli, Homarr, Dashdot, Pinchflat, and Plex-Trakt-Sync.
+And all the developers of the tools in this stack: Jellyfin, Radarr, Sonarr, Prowlarr, Jellyseerr, Zurg, Rclone, Zilean, Decypharr, RDTClient, Autoscan, Traefik, Watchtower, Jellystat, Homarr, Dashdot, and Pinchflat.
 
 ## License
 

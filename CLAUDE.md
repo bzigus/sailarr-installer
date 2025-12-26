@@ -54,14 +54,14 @@ docker logs zurg
 docker stats
 
 # Check health check logs
-tail -f /YOUR_INSTALL_DIR/logs/plex-mount-healthcheck.log
+tail -f /YOUR_INSTALL_DIR/logs/jellyfin-mount-healthcheck.log
 tail -f /YOUR_INSTALL_DIR/logs/arrs-mount-healthcheck.log
 
 # Verify cron jobs
 crontab -l | grep healthcheck
 
 # Manual health check execution
-/YOUR_INSTALL_DIR/scripts/health/plex-mount-healthcheck.sh
+/YOUR_INSTALL_DIR/scripts/health/jellyfin-mount-healthcheck.sh
 /YOUR_INSTALL_DIR/scripts/health/arrs-mount-healthcheck.sh
 ```
 
@@ -185,7 +185,7 @@ ${ROOT_DIR}/
 - **`docker/.env.local`**: User-specific variables (UIDs, tokens, created by setup.sh)
 - **`docker/compose-services/*.yml`**: Modular Docker service definitions
 - **`config/recyclarr.yml`**: Automated quality profiles with TRaSH-Guides compliance
-- **`config/autoscan/config.yml`**: Webhook configuration for Plex library updates
+- **`config/autoscan/config.yml`**: Webhook configuration for Jellyfin library updates
 - **`config/indexers/zilean.yml`**: Zilean indexer definition for Prowlarr
 - **`config/indexers/zurg.yml`**: Zurg indexer definition for Prowlarr
 
@@ -249,7 +249,7 @@ This is a configuration-heavy deployment project without formal tests. Validatio
 
 ### Docker Compose
 - Split services into individual files in `compose-services/`
-- Use `network_mode: host` only for Plex
+- Use `network_mode: host` only for Jellyfin
 - All other services use `mediacenter` bridge network
 - Health checks defined for all critical services
 - Environment variables from `.env.defaults` and `.env.local`
