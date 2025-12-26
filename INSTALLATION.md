@@ -148,20 +148,23 @@ Do you want to configure authentication? (y/n):
 Do you want to enable Traefik? (y/n):
 ```
 
-**What it does:** Enables Traefik reverse proxy with automatic HTTPS support.
+**What it does:** Enables Traefik reverse proxy with automatic HTTPS support using Let's Encrypt.
 
 **Benefits:**
 - Access services via subdomains (e.g., `radarr.yourdomain.com`)
-- Automatic HTTPS certificates
+- Automatic HTTPS certificates from Let's Encrypt
 - Single entry point for all services
 - Better security with authentication
+- Automatic HTTP to HTTPS redirect
 
 **Requirements:**
 - A domain name pointing to your server
 - Ports 80 and 443 open on your firewall
+- Valid email address for Let's Encrypt certificate notifications
 
 **If enabled, you'll be asked:**
 - **Domain/Hostname:** Your domain name (e.g., `mediacenter.example.com`)
+- **Let's Encrypt Email:** Email for certificate expiration notifications
 
 **When to enable:**
 - You have a domain name

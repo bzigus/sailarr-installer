@@ -30,7 +30,8 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.rdtclient.rule=Host(`${RDTCLIENT_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-    - traefik.http.routers.rdtclient.entrypoints=web
+    - traefik.http.routers.rdtclient.entrypoints=websecure
+    - traefik.http.routers.rdtclient.tls.certresolver=letsencrypt
     - traefik.http.services.rdtclient.loadbalancer.server.port=6500
     volumes:
     - ${ROOT_DIR}/data:/data

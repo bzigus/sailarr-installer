@@ -7,7 +7,10 @@ services:
       - ../.env.defaults
       - ../.env.local
     container_name: jellyfin
-    network_mode: host
+    user: ${JELLYFIN_UID}:${MEDIACENTER_GID}
+    networks:
+      mediacenter:
+        ipv4_address: 172.30.0.11
     restart: unless-stopped
     environment:
       - PUID=${JELLYFIN_UID}
@@ -17,6 +20,8 @@ services:
       - ${ROOT_DIR}/config/jellyfin-config:/config
       - ${ROOT_DIR}/config/jellyfin-cache:/cache
       - ${ROOT_DIR}/data:/data
+    ports:
+      - ${JELLYFIN_PORT}:8096
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent http://localhost:8096/health && test -d /data/realdebrid-zurg && mountpoint -q /data/realdebrid-zurg"]
       interval: 30s
@@ -30,3 +35,9 @@ services:
       rclone:
         condition: service_healthy
         restart: true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyfin.rule=Host(`${JELLYFIN_TRAEFIK_NAME}.${DOMAIN_NAME}`)
+      - traefik.http.routers.jellyfin.entrypoints=websecure
+      - traefik.http.routers.jellyfin.tls.certresolver=letsencrypt
+      - traefik.http.services.jellyfin.loadbalancer.server.port=8096

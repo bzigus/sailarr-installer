@@ -33,7 +33,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.jellystat.rule=Host(`${JELLYSTAT_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-      - traefik.http.routers.jellystat.entrypoints=web
+      - traefik.http.routers.jellystat.entrypoints=websecure
+      - traefik.http.routers.jellystat.tls.certresolver=letsencrypt
       - traefik.http.services.jellystat.loadbalancer.server.port=3000
     depends_on:
       jellyfin:
