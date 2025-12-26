@@ -1,25 +1,33 @@
-# MediaManager Configuration File
+# MediaManager Example Configuration File
+# This file contains all available configuration options for MediaManager
 # Documentation: https://maxdorninger.github.io/MediaManager/introduction.html
+#
+# This is an example configuration file that gets copied to your config folder
+# on first boot. You should modify the values below to match your setup.
 
 [misc]
-frontend_url = "http://localhost:8000"
-cors_urls = ["http://localhost:8000"]
+# it's very likely that you need to change this for MediaManager to work
+frontend_url = "http://localhost:8000" # note the lack of a trailing slash
+cors_urls = ["http://localhost:8000"] # note the lack of a trailing slash
 
 image_directory = "/data/images"
 tv_directory = "/data/media/tv"
 movie_directory = "/data/media/movies"
-torrent_directory = "/data/media"
+torrent_directory = "/data/media" # this is where MediaManager will search for the downloaded torrents and usenet files
 
+# you probaly don't need to change this
 development = false
 
 # Custom Media Libraries
+# These paths should match your volume mounts in docker-compose.yaml
+# Example: if you mount "./movies:/media/movies" then use path = "/media/movies/subdirectory"
 [[misc.tv_libraries]]
 name = "TV Shows"
-path = "/data/media/tv"
+path = "/data/media/tv"  # Change this to match your actual TV shows location
 
 [[misc.movie_libraries]]
 name = "Movies"
-path = "/data/media/movies"
+path = "/data/media/movies"  # Change this to match your actual movies location
 
 [database]
 host = "db"
@@ -29,12 +37,13 @@ password = "MEDIAMANAGER_DB_PASSWORD_PLACEHOLDER"
 dbname = "MediaManager"
 
 [auth]
-email_password_resets = false
+email_password_resets = false # if true, you also need to set up SMTP (notifications.smtp_config)
 
-token_secret = "TOKEN_SECRET_PLACEHOLDER"
-session_lifetime = 86400
+token_secret = "TOKEN_SECRET_PLACEHOLDER" # generate a random string with "openssl rand -hex 32", e.g. here https://www.cryptool.org/en/cto/openssl/
+session_lifetime = 86400  # this is how long you will be logged in after loggin in, in seconds
 
 # Admin users: Users who register with these email addresses will automatically become administrators
+# If no users exist in the database, a default admin user with the email "admin@example.com" and the password "admin" will be created
 admin_emails = ["admin@example.com"]
 
 # OpenID Connect settings
