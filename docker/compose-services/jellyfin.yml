@@ -10,7 +10,7 @@ services:
     user: ${JELLYFIN_UID}:${MEDIACENTER_GID}
     networks:
       mediacenter:
-        ipv4_address: 172.30.0.2
+        ipv4_address: 172.30.0.11
     restart: unless-stopped
     environment:
       - PUID=${JELLYFIN_UID}
