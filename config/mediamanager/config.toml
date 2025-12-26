@@ -22,7 +22,7 @@ name = "Movies"
 path = "/data/media/movies"
 
 [database]
-host = "mediamanager-postgres"
+host = "db"
 port = 5432
 user = "MediaManager"
 password = "MEDIAMANAGER_DB_PASSWORD_PLACEHOLDER"

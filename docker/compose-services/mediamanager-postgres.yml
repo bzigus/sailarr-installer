@@ -8,10 +8,13 @@ services:
       - ../.env.defaults
       - ../.env.local
     container_name: mediamanager-postgres
+    hostname: db
     cpus: 1.0
     networks:
       mediacenter:
         ipv4_address: 172.30.0.9
+        aliases:
+          - db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready --username=MediaManager --dbname=MediaManager --host=localhost --port=5432"]
       interval: 10s
