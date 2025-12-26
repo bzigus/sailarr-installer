@@ -25,6 +25,8 @@ services:
       - UMASK=002
       - TZ=${TIMEZONE}
       - CONFIG_DIR=/app/config
+      - HOME=/tmp/mediamanager
+      - XDG_CACHE_HOME=/tmp/mediamanager/.cache
     tmpfs:
       - /tmp:mode=770,noexec,size=100M,uid=${MEDIAMANAGER_UID},gid=${MEDIACENTER_GID}
     volumes:
