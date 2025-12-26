@@ -724,7 +724,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     
     # Set initial ownership and permissions
     sudo chown -R mediamanager:mediacenter "${ROOT_DIR}/config/mediamanager-config"
-    sudo chmod 600 "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    sudo chmod 664 "${ROOT_DIR}/config/mediamanager-config/config.toml"
     
     log_success "MediaManager configuration template created"
 
