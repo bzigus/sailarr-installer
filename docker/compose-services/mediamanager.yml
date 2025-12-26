@@ -18,7 +18,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     environment:
       - PUID=${MEDIAMANAGER_UID}
       - PGID=${MEDIACENTER_GID}
@@ -35,7 +35,7 @@ services:
       - ${ROOT_DIR}/data/images:/data/images
     ports:
       - ${MEDIAMANAGER_PORT}:8000
-    restart: on-failure:5
+    restart: unless-stopped
     logging:
       driver: local
       options:
@@ -48,8 +48,5 @@ services:
       - traefik.http.services.mediamanager.loadbalancer.server.port=8000
     depends_on:
       mediamanager-postgres:
-        condition: service_healthy
-        restart: true
-      prowlarr:
         condition: service_healthy
         restart: true
