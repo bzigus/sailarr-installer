@@ -698,6 +698,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     MEDIAMANAGER_TOKEN_SECRET=$(openssl rand -hex 32)
     MEDIAMANAGER_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
     
+    # Export variables so they're available in sudo commands
+    export MEDIAMANAGER_TOKEN_SECRET
+    export MEDIAMANAGER_DB_PASSWORD
+    
     # Write credentials to .env.install first
     echo "" >> "$DOCKER_DIR/.env.install"
     echo "# API Keys and Credentials (auto-generated during setup)" >> "$DOCKER_DIR/.env.install"
