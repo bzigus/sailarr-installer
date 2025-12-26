@@ -5,5 +5,7 @@ volumes:
     driver: local
   zilean_postgres:
     driver: local
+  mediamanager_postgres:
+    driver: local
   zurg_data:
     driver: local

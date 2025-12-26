@@ -1,0 +1,37 @@
+# MediaManager PostgreSQL Database
+# Required for MediaManager operation
+
+services:
+  mediamanager-postgres:
+    image: ${MEDIAMANAGER_POSTGRES_IMAGE}:${MEDIAMANAGER_POSTGRES_TAG}
+    env_file:
+      - ../.env.defaults
+      - ../.env.local
+    container_name: mediamanager-postgres
+    hostname: db
+    cpus: 1.0
+    networks:
+      mediacenter:
+        ipv4_address: 172.30.0.9
+        aliases:
+          - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=MediaManager --dbname=MediaManager --host=localhost --port=5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      - TZ=${TIMEZONE}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=MediaManager
+      - POSTGRES_PASSWORD=${MEDIAMANAGER_DB_PASSWORD}
+      - POSTGRES_DB=MediaManager
+    volumes:
+      - mediamanager_postgres:/var/lib/postgresql/data/pgdata
+    restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-file: '5'
+        max-size: 10m

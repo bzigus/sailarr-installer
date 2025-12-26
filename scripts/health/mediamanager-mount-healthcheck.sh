@@ -1,7 +1,7 @@
 #!/bin/bash
-# Jellyfin Mount Healthcheck Script
-# Verifies that Jellyfin can access the rclone mount
-# If not, restarts the container
+# MediaManager Mount Healthcheck Script
+# Verifies that MediaManager and Decypharr can access the rclone mount
+# If not, restarts the containers
 
 # Detect installation directory from .env.local or use default
 if [ -f "/mediacenter/docker/.env.local" ]; then
@@ -12,7 +12,7 @@ else
     ROOT_DIR="/mediacenter"  # Default fallback
 fi
 
-LOG_FILE="${ROOT_DIR}/logs/jellyfin-mount-healthcheck.log"
+LOG_FILE="${ROOT_DIR}/logs/mediamanager-mount-healthcheck.log"
 TEST_FILE="${ROOT_DIR}/data/realdebrid-zurg/torrents/.healthcheck_test.txt"
 DOCKER_COMPOSE_DIR="${ROOT_DIR}/docker"
 
@@ -41,10 +41,18 @@ restart_container() {
     fi
 }
 
-# Check Jellyfin
-if ! check_container "jellyfin"; then
-    log "FAILED: Jellyfin cannot access $TEST_FILE"
-    restart_container "jellyfin"
+# Check MediaManager
+if ! check_container "mediamanager"; then
+    log "FAILED: MediaManager cannot access $TEST_FILE"
+    restart_container "mediamanager"
 else
-    log "OK: Jellyfin mount check passed"
+    log "OK: MediaManager mount check passed"
+fi
+
+# Check Decypharr
+if ! check_container "decypharr"; then
+    log "FAILED: Decypharr cannot access $TEST_FILE"
+    restart_container "decypharr"
+else
+    log "OK: Decypharr mount check passed"
 fi

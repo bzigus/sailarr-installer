@@ -111,7 +111,7 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
     # Ask for authentication credentials (optional)
     echo "Service Authentication (Optional)"
     echo "----------------------------------"
-    echo "Configure username/password for Radarr, Sonarr, and Prowlarr web UI."
+    echo "Configure username/password for MediaManager and Prowlarr web UI."
     echo "Leave empty to skip and configure manually later."
     read -p "Do you want to configure authentication? (y/n): " -r
     echo ""
@@ -184,8 +184,7 @@ if [ "$SKIP_CONFIGURATION" = false ]; then
     # Check UIDs
     declare -A USERS=(
         ["RCLONE_UID"]="rclone"
-        ["SONARR_UID"]="sonarr"
-        ["RADARR_UID"]="radarr"
+        ["MEDIAMANAGER_UID"]="mediamanager"
         ["RECYCLARR_UID"]="recyclarr"
         ["PROWLARR_UID"]="prowlarr"
         ["JELLYSEERR_UID"]="jellyseerr"
@@ -285,8 +284,7 @@ MEDIACENTER_GID=$MEDIACENTER_GID
 
 # User IDs
 RCLONE_UID=${RCLONE_UID}
-SONARR_UID=${SONARR_UID}
-RADARR_UID=${RADARR_UID}
+MEDIAMANAGER_UID=${MEDIAMANAGER_UID}
 RECYCLARR_UID=${RECYCLARR_UID}
 PROWLARR_UID=${PROWLARR_UID}
 JELLYSEERR_UID=${JELLYSEERR_UID}
@@ -334,8 +332,7 @@ echo ""
 echo "USERS TO BE CREATED"
 echo "-------------------"
 echo "  - rclone (UID: ${RCLONE_UID})"
-echo "  - sonarr (UID: ${SONARR_UID})"
-echo "  - radarr (UID: ${RADARR_UID})"
+echo "  - mediamanager (UID: ${MEDIAMANAGER_UID})"
 echo "  - recyclarr (UID: ${RECYCLARR_UID})"
 echo "  - prowlarr (UID: ${PROWLARR_UID})"
 echo "  - jellyseerr (UID: ${JELLYSEERR_UID})"
@@ -350,16 +347,22 @@ echo "  - mediacenter (GID: ${MEDIACENTER_GID})"
 echo ""
 echo "DIRECTORIES TO BE CREATED"
 echo "-------------------------"
-echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr}-config"
-echo "  - ${ROOT_DIR}/data/symlinks/{radarr,sonarr}"
+echo "  - ${ROOT_DIR}/config/{mediamanager,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr}-config"
 echo "  - ${ROOT_DIR}/data/realdebrid-zurg"
 echo "  - ${ROOT_DIR}/data/media/{movies,tv}"
+echo "  - ${ROOT_DIR}/data/images"
+echo ""
+echo "DOCKER VOLUMES TO BE CREATED"
+echo "----------------------------"
+echo "  - mediamanager_postgres (PostgreSQL data)"
+echo "  - zilean_postgres (Zilean database)"
 echo ""
 echo "ADDITIONAL TASKS"
 echo "----------------"
 echo "  - Download Torrentio indexer for Prowlarr"
 echo "  - Configure Zurg with Real-Debrid token"
 echo "  - Configure Decypharr with Real-Debrid token"
+echo "  - Configure MediaManager with Prowlarr integration"
 echo "  - Set permissions (775/664)"
 echo "  - Add current user ($USER) to mediacenter group"
 echo ""
@@ -405,10 +408,10 @@ add_user_to_group $USER mediacenter
 # Create directories
 echo ""
 echo "Creating directory structure..."
-sudo mkdir -pv "${ROOT_DIR}/config"/{sonarr,radarr,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr,pinchflat}-config
-sudo mkdir -pv "${ROOT_DIR}/data/symlinks"/{radarr,sonarr}
+sudo mkdir -pv "${ROOT_DIR}/config"/{mediamanager,recyclarr,prowlarr,jellyseerr,jellyfin,jellyfin-cache,autoscan,zilean,decypharr,pinchflat}-config
 sudo mkdir -pv "${ROOT_DIR}/data/realdebrid-zurg"
 sudo mkdir -pv "${ROOT_DIR}/data/media"/{movies,tv}
+sudo mkdir -pv "${ROOT_DIR}/data/images"
 echo "✓ Directory structure created"
 
 # Set permissions
@@ -419,8 +422,7 @@ sudo chmod -R a=,a+rX,u+w,g+w ${ROOT_DIR}/config/
 
 sudo chown -R $INSTALL_UID:mediacenter ${ROOT_DIR}/data/
 sudo chown -R $INSTALL_UID:mediacenter ${ROOT_DIR}/config/
-sudo chown -R sonarr:mediacenter ${ROOT_DIR}/config/sonarr-config
-sudo chown -R radarr:mediacenter ${ROOT_DIR}/config/radarr-config
+sudo chown -R mediamanager:mediacenter ${ROOT_DIR}/config/mediamanager-config
 sudo chown -R recyclarr:mediacenter ${ROOT_DIR}/config/recyclarr-config
 sudo chown -R prowlarr:mediacenter ${ROOT_DIR}/config/prowlarr-config
 sudo chown -R jellyseerr:mediacenter ${ROOT_DIR}/config/jellyseerr-config
@@ -627,7 +629,7 @@ echo ""
 echo "========================================="
 echo "Mount Healthcheck Auto-Repair System"
 echo "========================================="
-echo "This system monitors if containers (Radarr, Sonarr, Decypharr, Jellyfin) can access"
+echo "This system monitors if containers (MediaManager, Decypharr, Jellyfin) can access"
 echo "the rclone mount and automatically restarts them if they lose access."
 echo ""
 read -p "Do you want to install the mount healthcheck auto-repair system? (y/n): " -r
@@ -637,13 +639,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Installing mount healthcheck scripts..."
 
     # Copy healthcheck scripts to /usr/local/bin/
-    sudo cp "$SCRIPT_DIR/scripts/health/arrs-mount-healthcheck.sh" /usr/local/bin/
+    sudo cp "$SCRIPT_DIR/scripts/health/mediamanager-mount-healthcheck.sh" /usr/local/bin/
     sudo cp "$SCRIPT_DIR/scripts/health/jellyfin-mount-healthcheck.sh" /usr/local/bin/
 
     # Set permissions
-    sudo chmod 775 /usr/local/bin/arrs-mount-healthcheck.sh
+    sudo chmod 775 /usr/local/bin/mediamanager-mount-healthcheck.sh
     sudo chmod 775 /usr/local/bin/jellyfin-mount-healthcheck.sh
-    sudo chown $USER:$USER /usr/local/bin/arrs-mount-healthcheck.sh
+    sudo chown $USER:$USER /usr/local/bin/mediamanager-mount-healthcheck.sh
     sudo chown $USER:$USER /usr/local/bin/jellyfin-mount-healthcheck.sh
 
     # Create logs directory
@@ -660,12 +662,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Add cron jobs if they don't already exist
-        (crontab -l 2>/dev/null | grep -v "arrs-mount-healthcheck"; echo "*/30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh") | crontab -
+        (crontab -l 2>/dev/null | grep -v "mediamanager-mount-healthcheck"; echo "*/30 * * * * /usr/local/bin/mediamanager-mount-healthcheck.sh") | crontab -
         (crontab -l 2>/dev/null | grep -v "jellyfin-mount-healthcheck"; echo "*/35 * * * * /usr/local/bin/jellyfin-mount-healthcheck.sh") | crontab -
         echo "✓ Cron jobs added successfully"
     else
         echo "Skipping cron job configuration. You can add them manually later:"
-        echo "  */30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh"
+        echo "  */30 * * * * /usr/local/bin/mediamanager-mount-healthcheck.sh"
         echo "  */35 * * * * /usr/local/bin/jellyfin-mount-healthcheck.sh"
     fi
 else
@@ -681,7 +683,7 @@ echo "========================================="
 echo "Auto-Configuration via API"
 echo "========================================="
 echo ""
-read -p "Do you want to auto-configure Radarr, Sonarr, and Prowlarr? (y/n): " -r
+read -p "Do you want to auto-configure MediaManager and Prowlarr? (y/n): " -r
 echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -691,10 +693,40 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Determine docker directory location
     DOCKER_DIR="${ROOT_DIR}/docker"
 
+    # Generate MediaManager credentials BEFORE starting services
+    echo "Generating MediaManager credentials..."
+    MEDIAMANAGER_TOKEN_SECRET=$(openssl rand -hex 32)
+    MEDIAMANAGER_DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+    
+    # Export variables so they're available in sudo commands
+    export MEDIAMANAGER_TOKEN_SECRET
+    export MEDIAMANAGER_DB_PASSWORD
+    
+    # Write credentials to .env.install first
+    echo "" >> "$DOCKER_DIR/.env.install"
+    echo "# API Keys and Credentials (auto-generated during setup)" >> "$DOCKER_DIR/.env.install"
+    echo "MEDIAMANAGER_TOKEN_SECRET=$MEDIAMANAGER_TOKEN_SECRET" >> "$DOCKER_DIR/.env.install"
+    echo "MEDIAMANAGER_DB_PASSWORD=$MEDIAMANAGER_DB_PASSWORD" >> "$DOCKER_DIR/.env.install"
+    echo "✓ MediaManager credentials generated"
+
     # Generate .env.local from .env.install for docker compose
     echo "Creating .env.local from .env.install..."
     cp "$DOCKER_DIR/.env.install" "$DOCKER_DIR/.env.local"
     echo "✓ .env.local created"
+    
+    # Copy MediaManager config template BEFORE starting containers
+    echo "Setting up MediaManager configuration..."
+    sudo cp "${SCRIPT_DIR}/config/mediamanager/config.toml" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    # Update MediaManager config with credentials (Prowlarr API key will be added after services start)
+    sudo sed -i "s|TOKEN_SECRET_PLACEHOLDER|${MEDIAMANAGER_TOKEN_SECRET}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    sudo sed -i "s|MEDIAMANAGER_DB_PASSWORD_PLACEHOLDER|${MEDIAMANAGER_DB_PASSWORD}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    # Set initial ownership and permissions
+    sudo chown -R mediamanager:mediacenter "${ROOT_DIR}/config/mediamanager-config"
+    sudo chmod 664 "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    log_success "MediaManager configuration template created"
 
     # Start services
     echo ""
@@ -730,8 +762,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         "rclone"
         "decypharr"
         "prowlarr"
-        "radarr"
-        "sonarr"
+        "mediamanager"
+        "mediamanager-postgres"
         "jellyseerr"
         "jellyfin"
         "zilean"
@@ -833,9 +865,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         wait_for_service "Traefik" "http://localhost:8080/api/version"
     fi
 
-    wait_for_service "Radarr" "http://localhost:7878"
-    wait_for_service "Sonarr" "http://localhost:8989"
     wait_for_service "Prowlarr" "http://localhost:9696"
+    wait_for_service "MediaManager" "http://localhost:8000"
 
     # Skip Zilean wait - it can take 10-30 minutes to import DMM data on first run
     echo "Zilean starting in background (will import DMM data, can take 10-30 minutes)"
@@ -856,99 +887,29 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     sleep 5
 
     # Extract API keys using library function
-    RADARR_API_KEY=$(extract_api_key "radarr" | tail -1)
-    SONARR_API_KEY=$(extract_api_key "sonarr" | tail -1)
     PROWLARR_API_KEY=$(extract_api_key "prowlarr" | tail -1)
 
-    if [ -z "$RADARR_API_KEY" ] || [ -z "$SONARR_API_KEY" ] || [ -z "$PROWLARR_API_KEY" ]; then
+    if [ -z "$PROWLARR_API_KEY" ]; then
         log_error "Failed to retrieve API keys. Services may not be fully initialized."
         log_error "Missing API keys:"
-        [ -z "$RADARR_API_KEY" ] && log_error "  - Radarr API key is empty"
-        [ -z "$SONARR_API_KEY" ] && log_error "  - Sonarr API key is empty"
         [ -z "$PROWLARR_API_KEY" ] && log_error "  - Prowlarr API key is empty"
-        log_error "Check service logs: docker logs radarr | docker logs sonarr | docker logs prowlarr"
+        log_error "Check service logs: docker logs prowlarr"
         log_error "Installation aborted - cannot continue without API keys"
         exit 1
     fi
 
     log_success "API keys retrieved"
-    echo "  - Radarr:   $RADARR_API_KEY"
-    echo "  - Sonarr:   $SONARR_API_KEY"
     echo "  - Prowlarr: $PROWLARR_API_KEY"
 
-        # Configure Radarr
-        RADARR_API_KEY=$(configure_arr_service "radarr" 7878 "movies" "decypharr" 8282 "$RADARR_API_KEY" | tail -1)
+    # Update MediaManager config with Prowlarr API key and domain
+    echo ""
+    echo "Updating MediaManager configuration with Prowlarr API key..."
+    
+    sudo sed -i "s|PROWLARR_API_KEY_PLACEHOLDER|${PROWLARR_API_KEY}|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    sudo sed -i "s|http://localhost:8000|http://${DOMAIN_NAME}:8000|g" "${ROOT_DIR}/config/mediamanager-config/config.toml"
+    
+    log_success "MediaManager configuration updated with Prowlarr integration"
 
-        # Configure Radarr authentication if enabled
-        if [ "$AUTH_ENABLED" = true ]; then
-            echo "  ⟳ Configuring Radarr authentication..."
-
-            # Get current config
-            CONFIG=$(curl -s "http://localhost:7878/api/v3/config/host" -H "X-Api-Key: $RADARR_API_KEY")
-            if [ -z "$CONFIG" ]; then
-                log_error "Failed to get Radarr config for authentication setup"
-                log_error "Installation aborted - cannot configure authentication"
-                exit 1
-            fi
-
-            # Update authentication settings
-            UPDATED_CONFIG=$(echo "$CONFIG" | jq --arg user "$AUTH_USERNAME" --arg pass "$AUTH_PASSWORD" \
-                '. + {authenticationMethod: "forms", username: $user, password: $pass, passwordConfirmation: $pass, authenticationRequired: "enabled"}')
-
-            # Send update and capture response with HTTP code
-            RESPONSE=$(curl -s -w '\n%{http_code}' -X PUT "http://localhost:7878/api/v3/config/host" \
-                -H "X-Api-Key: $RADARR_API_KEY" \
-                -H "Content-Type: application/json" \
-                -d "$UPDATED_CONFIG")
-
-            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-
-            if [[ "$HTTP_CODE" =~ ^2 ]]; then
-                echo "  ✓ Radarr authentication configured (HTTP $HTTP_CODE)"
-            else
-                log_error "Failed to configure Radarr authentication (HTTP $HTTP_CODE)"
-                log_error "Response: $(echo "$RESPONSE" | head -n -1)"
-                log_error "Installation aborted - authentication configuration failed"
-                exit 1
-            fi
-        fi
-
-        # Configure Sonarr
-        SONARR_API_KEY=$(configure_arr_service "sonarr" 8989 "tv" "decypharr" 8282 "$SONARR_API_KEY" | tail -1)
-
-        # Configure Sonarr authentication if enabled
-        if [ "$AUTH_ENABLED" = true ]; then
-            echo "  ⟳ Configuring Sonarr authentication..."
-
-            # Get current config
-            CONFIG=$(curl -s "http://localhost:8989/api/v3/config/host" -H "X-Api-Key: $SONARR_API_KEY")
-            if [ -z "$CONFIG" ]; then
-                log_error "Failed to get Sonarr config for authentication setup"
-                log_error "Installation aborted - cannot configure authentication"
-                exit 1
-            fi
-
-            # Update authentication settings
-            UPDATED_CONFIG=$(echo "$CONFIG" | jq --arg user "$AUTH_USERNAME" --arg pass "$AUTH_PASSWORD" \
-                '. + {authenticationMethod: "forms", username: $user, password: $pass, passwordConfirmation: $pass, authenticationRequired: "enabled"}')
-
-            # Send update and capture response with HTTP code
-            RESPONSE=$(curl -s -w '\n%{http_code}' -X PUT "http://localhost:8989/api/v3/config/host" \
-                -H "X-Api-Key: $SONARR_API_KEY" \
-                -H "Content-Type: application/json" \
-                -d "$UPDATED_CONFIG")
-
-            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-
-            if [[ "$HTTP_CODE" =~ ^2 ]]; then
-                echo "  ✓ Sonarr authentication configured (HTTP $HTTP_CODE)"
-            else
-                log_error "Failed to configure Sonarr authentication (HTTP $HTTP_CODE)"
-                log_error "Response: $(echo "$RESPONSE" | head -n -1)"
-                log_error "Installation aborted - authentication configuration failed"
-                exit 1
-            fi
-        fi
 
         # Configure Prowlarr
         echo ""
@@ -1045,90 +1006,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             }' > /dev/null 2>&1
         echo "  ✓ Indexer added: YTS"
 
-        # Add Radarr and Sonarr as applications in Prowlarr
-        if ! add_arr_to_prowlarr "radarr" 7878 "$RADARR_API_KEY" 9696 "$PROWLARR_API_KEY"; then
-            log_error "Installation aborted - failed to add Radarr to Prowlarr"
-            exit 1
-        fi
-
-        if ! add_arr_to_prowlarr "sonarr" 8989 "$SONARR_API_KEY" 9696 "$PROWLARR_API_KEY"; then
-            log_error "Installation aborted - failed to add Sonarr to Prowlarr"
-            exit 1
-        fi
-
-        # Trigger indexer sync to all applications
         echo ""
-        echo "Triggering indexer sync to Radarr and Sonarr..."
-        RADARR_APP_ID=$(curl -s "http://localhost:9696/api/v1/applications" -H "X-Api-Key: $PROWLARR_API_KEY" | jq -r '.[] | select(.name == "Radarr") | .id')
-        SONARR_APP_ID=$(curl -s "http://localhost:9696/api/v1/applications" -H "X-Api-Key: $PROWLARR_API_KEY" | jq -r '.[] | select(.name == "Sonarr") | .id')
-
-        if [ -n "$RADARR_APP_ID" ]; then
-            curl -s -X POST "http://localhost:9696/api/v1/command" \
-                -H "X-Api-Key: $PROWLARR_API_KEY" \
-                -H "Content-Type: application/json" \
-                -d '{"name": "ApplicationIndexerSync", "applicationIds": ['"$RADARR_APP_ID"']}' > /dev/null 2>&1
-            echo "  ✓ Triggered sync to Radarr"
-        fi
-
-        if [ -n "$SONARR_APP_ID" ]; then
-            curl -s -X POST "http://localhost:9696/api/v1/command" \
-                -H "X-Api-Key: $PROWLARR_API_KEY" \
-                -H "Content-Type: application/json" \
-                -d '{"name": "ApplicationIndexerSync", "applicationIds": ['"$SONARR_APP_ID"']}' > /dev/null 2>&1
-            echo "  ✓ Triggered sync to Sonarr"
-        fi
-
-        echo "  ✓ Indexer sync completed"
-
-        # Configure quality profiles and naming with Recyclarr
-        echo ""
-        echo "Configuring quality profiles and naming conventions with Recyclarr..."
-        echo "This will:"
-        echo "  • Remove default quality profiles"
-        echo "  • Create TRaSH Guide profiles (Recyclarr-1080p, Recyclarr-2160p, Recyclarr-Any)"
-        echo "  • Configure custom formats from TRaSH Guides"
-        echo "  • Set up media naming conventions for Jellyfin compatibility"
-        echo ""
-
-        # Delete default quality profiles
-        remove_default_profiles "radarr" 7878 "$RADARR_API_KEY"
-        remove_default_profiles "sonarr" 8989 "$SONARR_API_KEY"
-        echo ""
-
-        # Run Recyclarr to create TRaSH Guide profiles
-        echo "Creating TRaSH Guide quality profiles..."
-
-        # Create temporary recyclarr config with API keys injected
-        # Uses AWK pattern matching instead of hardcoded line numbers for robustness
-        awk -v radarr_key="${RADARR_API_KEY}" -v sonarr_key="${SONARR_API_KEY}" '
-            /^radarr:/ {in_radarr=1; in_sonarr=0}
-            /^sonarr:/ {in_radarr=0; in_sonarr=1}
-            /api_key:$/ {
-                if (in_radarr) {print "    api_key: " radarr_key; next}
-                if (in_sonarr) {print "    api_key: " sonarr_key; next}
-            }
-            {print}
-        ' "${ROOT_DIR}/recyclarr.yml" > /tmp/recyclarr-temp.yml
-
-        docker run --rm \
-            --network mediacenter \
-            -v "/tmp/recyclarr-temp.yml:/config/recyclarr.yml:ro" \
-            ghcr.io/recyclarr/recyclarr:latest \
-            sync
-
-        # Clean up temp file
-        rm -f /tmp/recyclarr-temp.yml
-
-        if [ $? -eq 0 ]; then
-            echo ""
-            echo "  ✓ Recyclarr configuration completed"
-            echo "  ✓ Quality profiles created: Recyclarr-1080p, Recyclarr-2160p, Recyclarr-Any"
-            echo "  ✓ Media naming configured for Jellyfin"
-        else
-            echo ""
-            echo "  ⚠ Recyclarr sync failed (non-critical)"
-            echo "  You can run it manually later: ./recyclarr-sync.sh"
-        fi
+        echo "  ✓ Prowlarr configuration completed"
+        echo "  Note: MediaManager will use Prowlarr indexers directly via API"
 
         # Configure Prowlarr authentication if enabled
         if [ "$AUTH_ENABLED" = true ]; then
@@ -1145,9 +1025,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         fi
 
         echo "" >> "$DOCKER_DIR/.env.install"
-        echo "# API Keys (auto-generated during setup)" >> "$DOCKER_DIR/.env.install"
-        echo "RADARR_API_KEY=$RADARR_API_KEY" >> "$DOCKER_DIR/.env.install"
-        echo "SONARR_API_KEY=$SONARR_API_KEY" >> "$DOCKER_DIR/.env.install"
+        echo "# API Keys and Credentials (auto-generated during setup)" >> "$DOCKER_DIR/.env.install"
         echo "PROWLARR_API_KEY=$PROWLARR_API_KEY" >> "$DOCKER_DIR/.env.install"
 
         echo ""
@@ -1198,15 +1076,13 @@ echo ""
 echo "SERVICES AUTOMATICALLY CONFIGURED:"
 echo "  ✓ Zurg - Real-Debrid token configured"
 echo "  ✓ Decypharr - Real-Debrid token and settings configured"
-echo "  ✓ Radarr - Root folder + Decypharr download client + quality profiles"
-echo "  ✓ Sonarr - Root folder + Decypharr download client + quality profiles"
+echo "  ✓ MediaManager - Prowlarr integration and download client configured"
 echo "  ✓ Prowlarr - 6 indexers (Torrentio, Zilean, 1337x, TPB, YTS, EZTV)"
-echo "             - Radarr/Sonarr sync enabled (indexers auto-synced)"
-echo "  ✓ Recyclarr - Quality profiles and naming conventions from TRaSH Guides"
 echo ""
 echo "SERVICES REQUIRING MANUAL CONFIGURATION:"
 echo "  • Jellyfin - Add media libraries (/data/media/movies, /data/media/tv)"
-echo "  • Jellyseerr - Connect to Jellyfin and Radarr/Sonarr (optional)"
+echo "  • MediaManager - Create admin account and configure libraries"
+echo "  • Jellyseerr - Connect to Jellyfin (optional)"
 echo "  • Prowlarr - Add more indexers if needed (optional)"
 echo ""
 echo "IMPORTANT - ZILEAN INDEXER:"
@@ -1219,17 +1095,15 @@ echo "Next steps:"
 echo "1. All services are now running! You can access them at:"
 if [ "$TRAEFIK_ENABLED" = true ]; then
     echo "   • Traefik Dashboard: http://${DOMAIN_NAME}:8080"
-    echo "   • Prowlarr:   http://prowlarr.${DOMAIN_NAME}  (already configured!)"
-    echo "   • Radarr:     http://radarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Sonarr:     http://sonarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Jellyseerr: http://jellyseerr.${DOMAIN_NAME}"
-    echo "   • Jellyfin:   http://${DOMAIN_NAME}:8096/web"
+    echo "   • Prowlarr:      http://prowlarr.${DOMAIN_NAME}  (already configured!)"
+    echo "   • MediaManager:  http://mediamanager.${DOMAIN_NAME}  (configure libraries)"
+    echo "   • Jellyseerr:    http://jellyseerr.${DOMAIN_NAME}"
+    echo "   • Jellyfin:      http://${DOMAIN_NAME}:8096/web"
 else
-    echo "   • Prowlarr:   http://${DOMAIN_NAME}:9696  (already configured!)"
-    echo "   • Radarr:     http://${DOMAIN_NAME}:7878  (already configured!)"
-    echo "   • Sonarr:     http://${DOMAIN_NAME}:8989  (already configured!)"
-    echo "   • Jellyseerr: http://${DOMAIN_NAME}:5055"
-    echo "   • Jellyfin:   http://${DOMAIN_NAME}:8096/web"
+    echo "   • Prowlarr:      http://${DOMAIN_NAME}:9696  (already configured!)"
+    echo "   • MediaManager:  http://${DOMAIN_NAME}:8000  (configure libraries)"
+    echo "   • Jellyseerr:    http://${DOMAIN_NAME}:5055"
+    echo "   • Jellyfin:      http://${DOMAIN_NAME}:8096/web"
 fi
 echo ""
 echo "2. Configure remaining services manually:"
@@ -1239,23 +1113,19 @@ echo "   • Movies: /data/media/movies"
 echo "   • TV Shows: /data/media/tv"
 echo "   • YouTube: /data/media/youtube"
 echo ""
-echo "   JELLYSEERR - Connect to Jellyfin and Radarr/Sonarr:"
-echo "   • Sign in with Jellyfin account"
-echo "   • Add Radarr and Sonarr with their API keys (see below)"
-echo "   • Configure quality profiles and root folders"
-echo "   • Detailed guide: docker/POST-INSTALL.md"
+echo "   MEDIAMANAGER - Complete setup:"
+echo "   • Create admin account (first login)"
+echo "   • Configure torrent client (Decypharr is already set)"
+echo "   • Configure libraries and quality preferences"
+echo "   • Detailed guide: https://maxdorninger.github.io/MediaManager"
 echo ""
-echo "   API KEYS FOR JELLYSEERR CONFIGURATION:"
-echo "   • Radarr API Key: ${RADARR_API_KEY}"
-echo "   • Sonarr API Key: ${SONARR_API_KEY}"
+echo "   API KEYS FOR REFERENCE:"
 echo "   • Prowlarr API Key: ${PROWLARR_API_KEY}"
+echo "   • MediaManager DB Password: ${MEDIAMANAGER_DB_PASSWORD}"
 echo ""
+echo "   JELLYSEERR - Connect to Jellyfin (optional)"
 echo "   PINCHFLAT - Configure YouTube downloads (optional)"
 echo "   JELLYSTAT - Connect to Jellyfin for statistics (optional)"
-echo ""
-echo "   RECYCLARR - Update quality profiles (optional):"
-echo "   • To manually update profiles: cd ${ROOT_DIR} && ./recyclarr-sync.sh"
-echo "   • Recommended after TRaSH Guides updates or profile changes"
 echo ""
 echo "3. IMPORTANT: Apply group changes to current session:"
 echo "   newgrp mediacenter"

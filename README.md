@@ -4,7 +4,7 @@ Fully automated installation script for creating your own media server powered b
 
 ## What is This?
 
-This installer deploys a complete media automation stack that streams content from Real-Debrid through Jellyfin, using the *Arr applications (Radarr, Sonarr, Prowlarr) to manage your library. The installer handles everything automatically based on your preferences.
+This installer deploys a complete media automation stack that streams content from Real-Debrid through Jellyfin, using MediaManager to manage your TV and movie library. The installer handles everything automatically based on your preferences.
 
 **Key Features:**
 - **Fully Interactive Setup** - Configure exactly what you need
@@ -45,9 +45,8 @@ The stack includes these services, configured based on your selections:
 ### Core Services (Always Installed)
 
 - **[Jellyfin](https://jellyfin.org/)** - Media streaming server
-- **[Radarr](https://radarr.video/)** - Movie management and automation
-- **[Sonarr](https://sonarr.tv/)** - TV series management and automation
-- **[Prowlarr](https://prowlarr.com/)** - Indexer management for all *Arrs
+- **[MediaManager](https://github.com/maxdorninger/MediaManager)** - Modern unified TV and movie management (replaces Radarr/Sonarr)
+- **[Prowlarr](https://prowlarr.com/)** - Indexer management for MediaManager
 - **[Zurg](https://github.com/debridmediamanager/zurg-testing)** - Real-Debrid WebDAV server
 - **[Rclone](https://github.com/rclone/rclone)** - Mounts Zurg as local filesystem
 - **[Zilean](https://github.com/iPromKnight/zilean)** - Debrid Media Manager indexer
@@ -113,8 +112,7 @@ After installation, access your services at different URLs depending on your con
 ### Without Traefik (Direct Access)
 
 - **Jellyfin:** `http://SERVER_IP:8096/web`
-- **Radarr:** `http://SERVER_IP:7878`
-- **Sonarr:** `http://SERVER_IP:8989`
+- **MediaManager:** `http://SERVER_IP:8000`
 - **Prowlarr:** `http://SERVER_IP:9696`
 - **Jellyseerr:** `http://SERVER_IP:5055`
 - **Zilean:** `http://SERVER_IP:8181`
@@ -132,8 +130,7 @@ Replace `SERVER_IP` with your actual server IP address or hostname.
 Services are accessible via subdomains of your configured domain:
 
 - **Jellyfin:** `https://jellyfin.YOUR_DOMAIN`
-- **Radarr:** `https://radarr.YOUR_DOMAIN`
-- **Sonarr:** `https://sonarr.YOUR_DOMAIN`
+- **MediaManager:** `https://mediamanager.YOUR_DOMAIN`
 - **Prowlarr:** `https://prowlarr.YOUR_DOMAIN`
 - **Jellyseerr:** `https://jellyseerr.YOUR_DOMAIN`
 - **Zilean:** `https://zilean.YOUR_DOMAIN`
@@ -155,7 +152,8 @@ After the automated installation completes, some services require manual configu
 
 **📖 See [docker/POST-INSTALL.md](docker/POST-INSTALL.md) for detailed step-by-step instructions on:**
 
-- **Jellyseerr Setup** - Connect Jellyfin account, select libraries, and add Radarr/Sonarr servers
+- **MediaManager Setup** - Create admin account, configure libraries and download client
+- **Jellyseerr Setup** - Connect Jellyfin account and select libraries
 - **Jellystat Setup** - Connect to Jellyfin for analytics and monitoring
 - **Additional Configuration** - Optional tweaks and customizations
 
@@ -166,13 +164,13 @@ The automated installer handles 95% of the setup, but these services need your J
 The workflow is completely automated:
 
 1. **Request** content through Jellyseerr
-2. **Search** - Radarr/Sonarr search indexers via Prowlarr
+2. **Search** - MediaManager searches indexers via Prowlarr
 3. **Find** - Zilean provides cached torrents from Debrid Media Manager
 4. **Add** - Decypharr adds torrent to Real-Debrid
 5. **Mount** - Zurg exposes Real-Debrid library via WebDAV
 6. **Access** - Rclone mounts Zurg as local filesystem
 7. **Link** - Decypharr creates symlinks to mounted files
-8. **Import** - Radarr/Sonarr import the symlinks
+8. **Import** - MediaManager imports the symlinks
 9. **Scan** - Autoscan triggers Jellyfin library refresh
 10. **Stream** - Watch instantly through Jellyfin
 
@@ -202,8 +200,8 @@ No actual downloading to local storage - everything streams from Real-Debrid.
 If enabled, the installer:
 - Extracts API keys from services
 - Configures Prowlarr with Zilean indexer
-- Connects Radarr/Sonarr to Prowlarr
-- Sets up Decypharr as download client in Radarr/Sonarr
+- Connects MediaManager to Prowlarr
+- Sets up Decypharr as download client in MediaManager
 - Configures Real-Debrid settings in Decypharr
 - Sets root folders for media
 - Removes default quality profiles
@@ -237,8 +235,8 @@ cd /YOUR_INSTALL_DIR
 ├── config/              # Application configurations
 │   ├── jellyfin-config/
 │   ├── jellyfin-cache/
-│   ├── radarr-config/
-│   ├── sonarr-config/
+│   ├── mediamanager-config/
+│   ├── mediamanager-postgres/
 │   ├── prowlarr-config/
 │   ├── jellyseerr-config/
 │   ├── zilean-config/
@@ -253,10 +251,8 @@ cd /YOUR_INSTALL_DIR
 │   └── ...
 ├── data/               # Media and downloads
 │   ├── media/
-│   │   ├── movies/    # Radarr movies
-│   │   └── tv/        # Sonarr TV shows
-│   │   ├── radarr/    # Radarr symlinks
-│   │   └── sonarr/    # Sonarr symlinks
+│   │   ├── movies/    # Movie library
+│   │   └── tv/        # TV library
 │   └── realdebrid-zurg/ # Rclone mount point
 ├── logs/              # Health check logs
 ├── docker/            # Docker Compose files
@@ -297,7 +293,7 @@ docker logs <container_name>
 
 # Examples:
 docker logs jellyfin
-docker logs radarr
+docker logs mediamanager
 docker logs zurg
 ```
 
@@ -373,7 +369,7 @@ The installer sets up automatic health checks that monitor critical mounts:
 
 **How it works:**
 - **Jellyfin health check:** Runs every 35 minutes, verifies `/data/realdebrid-zurg` is accessible
-- **Arrs health check:** Runs every 30 minutes, verifies mounts for Radarr, Sonarr, and Decypharr
+- **MediaManager health check:** Runs every 30 minutes, verifies mounts for MediaManager and Decypharr
 - **Auto-recovery:** If a mount fails, the affected container is automatically restarted
 - **Logging:** All checks are logged to `/YOUR_INSTALL_DIR/logs/`
 
@@ -457,13 +453,13 @@ This project builds upon the excellent work of many in the community:
 - **[TRaSH Guides](https://trash-guides.info/)** - Quality profiles, custom formats, and best practices
 - **[Savvy Guides / Sailarr's Guide](https://savvyguides.wiki/sailarrsguide/)** - Comprehensive *Arr stack documentation
 - **[Servarr Wiki](https://wiki.servarr.com/)** - Official documentation and [Docker Guide](https://wiki.servarr.com/docker-guide)
-- **[Recyclarr](https://recyclarr.dev/)** - Automated TRaSH Guide syncing
+- **[MediaManager Docs](https://maxdorninger.github.io/MediaManager/)** - Official MediaManager documentation
 - **[ElfHosted](https://elfhosted.com/guides/media/stream-from-real-debrid-with-plex-radarr-sonarr-prowlarr/)** - Real-Debrid streaming architecture
 - **[Ezarr](https://github.com/Luctia/ezarr)** - Docker *Arr stack approach
 - **[Debrid Media Manager](https://github.com/debridmediamanager/debrid-media-manager)** - Torrent caching platform
 - **[dreulavelle/Prowlarr-Indexers](https://github.com/dreulavelle/Prowlarr-Indexers)** - Custom Prowlarr indexer definitions
 
-And all the developers of the tools in this stack: Jellyfin, Radarr, Sonarr, Prowlarr, Jellyseerr, Zurg, Rclone, Zilean, Decypharr, RDTClient, Autoscan, Traefik, Watchtower, Jellystat, Homarr, Dashdot, and Pinchflat.
+And all the developers of the tools in this stack: Jellyfin, MediaManager, Prowlarr, Jellyseerr, Zurg, Rclone, Zilean, Decypharr, RDTClient, Autoscan, Traefik, Watchtower, Jellystat, Homarr, Dashdot, and Pinchflat.
 
 ## License
 

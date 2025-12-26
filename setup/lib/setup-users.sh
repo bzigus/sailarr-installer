@@ -85,10 +85,8 @@ setup_mediacenter_users() {
     log_operation "UID/GID Allocation" "Finding available IDs starting from UID:$base_uid GID:$base_gid"
     local mediacenter_gid=$(find_available_gid $base_gid)
     local rclone_uid=$(find_available_uid $base_uid)
-    local sonarr_uid=$(find_available_uid $((rclone_uid + 1)))
-    local radarr_uid=$(find_available_uid $((sonarr_uid + 1)))
-    local recyclarr_uid=$(find_available_uid $((radarr_uid + 1)))
-    local prowlarr_uid=$(find_available_uid $((recyclarr_uid + 1)))
+    local mediamanager_uid=$(find_available_uid $((rclone_uid + 1)))
+    local prowlarr_uid=$(find_available_uid $((mediamanager_uid + 1)))
     local jellyseerr_uid=$(find_available_uid $((prowlarr_uid + 1)))
     local jellyfin_uid=$(find_available_uid $((jellyseerr_uid + 1)))
     local decypharr_uid=$(find_available_uid $((jellyfin_uid + 1)))
@@ -104,9 +102,7 @@ setup_mediacenter_users() {
 
     # Create service users
     create_system_user "rclone" "$rclone_uid" "$mediacenter_gid" "Rclone"
-    create_system_user "sonarr" "$sonarr_uid" "$mediacenter_gid" "Sonarr"
-    create_system_user "radarr" "$radarr_uid" "$mediacenter_gid" "Radarr"
-    create_system_user "recyclarr" "$recyclarr_uid" "$mediacenter_gid" "Recyclarr"
+    create_system_user "mediamanager" "$mediamanager_uid" "$mediacenter_gid" "MediaManager"
     create_system_user "prowlarr" "$prowlarr_uid" "$mediacenter_gid" "Prowlarr"
     create_system_user "jellyseerr" "$jellyseerr_uid" "$mediacenter_gid" "Jellyseerr"
     create_system_user "jellyfin" "$jellyfin_uid" "$mediacenter_gid" "Jellyfin Media Server"
@@ -121,9 +117,7 @@ setup_mediacenter_users() {
     # Export UIDs/GIDs for use in .env files
     export MEDIACENTER_GID=$mediacenter_gid
     export RCLONE_UID=$rclone_uid
-    export SONARR_UID=$sonarr_uid
-    export RADARR_UID=$radarr_uid
-    export RECYCLARR_UID=$recyclarr_uid
+    export MEDIAMANAGER_UID=$mediamanager_uid
     export PROWLARR_UID=$prowlarr_uid
     export JELLYSEERR_UID=$jellyseerr_uid
     export JELLYFIN_UID=$jellyfin_uid

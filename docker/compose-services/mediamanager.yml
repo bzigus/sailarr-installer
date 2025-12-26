@@ -1,0 +1,46 @@
+# MediaManager - Modern Media Management System
+# Replaces Radarr and Sonarr with unified TV/Movie management
+
+services:
+  mediamanager:
+    image: ${MEDIAMANAGER_IMAGE}:${MEDIAMANAGER_TAG}
+    env_file:
+      - ../.env.defaults
+      - ../.env.local
+    container_name: mediamanager
+    cpus: 2.0
+    user: ${MEDIAMANAGER_UID}:${MEDIACENTER_GID}
+    networks:
+      mediacenter:
+        ipv4_address: 172.30.0.8
+    environment:
+      - PUID=${MEDIAMANAGER_UID}
+      - PGID=${MEDIACENTER_GID}
+      - UMASK=002
+      - TZ=${TIMEZONE}
+      - CONFIG_DIR=/app/config
+      - HOME=/tmp/mediamanager
+      - XDG_CACHE_HOME=/tmp/mediamanager/.cache
+    tmpfs:
+      - /tmp:mode=770,noexec,size=100M,uid=${MEDIAMANAGER_UID},gid=${MEDIACENTER_GID}
+    volumes:
+      - ${ROOT_DIR}/config/mediamanager-config:/app/config
+      - ${ROOT_DIR}/data:/data
+      - ${ROOT_DIR}/data/images:/data/images
+    ports:
+      - ${MEDIAMANAGER_PORT}:8000
+    restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-file: '5'
+        max-size: 10m
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mediamanager.rule=Host(`${MEDIAMANAGER_TRAEFIK_NAME}.${DOMAIN_NAME}`)
+      - traefik.http.routers.mediamanager.entrypoints=web
+      - traefik.http.services.mediamanager.loadbalancer.server.port=8000
+    depends_on:
+      mediamanager-postgres:
+        condition: service_healthy
+        restart: true

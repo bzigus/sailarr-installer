@@ -42,10 +42,7 @@ services:
     - traefik.http.routers.jellyseerr.entrypoints=web
     - traefik.http.services.jellyseerr.loadbalancer.server.port=5055
     depends_on:
-      sonarr:
-        condition: service_healthy
-        restart: true
-      radarr:
+      mediamanager:
         condition: service_healthy
         restart: true
       prowlarr:
