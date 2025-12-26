@@ -14,8 +14,7 @@ Each service is defined in its own YAML file for better organization and mainten
 │   ├── traefik.yml             # Reverse proxy
 │   ├── jellyfin.yml            # Media server
 │   ├── jellyseerr.yml          # Request management
-│   ├── radarr.yml              # Movie management
-│   ├── sonarr.yml              # TV show management
+│   ├── mediamanager.yml        # Unified media management
 │   └── ...                     # Other services
 ```
 
@@ -32,7 +31,7 @@ docker compose up -d
 docker compose up -d jellyfin jellyseerr
 
 # Start media management stack
-docker compose up -d radarr sonarr prowlarr
+docker compose up -d mediamanager prowlarr
 ```
 
 ### Stop all services:
@@ -43,18 +42,18 @@ docker compose down
 ### View specific service logs:
 ```bash
 docker compose logs -f jellyfin
-docker compose logs -f radarr
+docker compose logs -f mediamanager
 ```
 
 ### Restart a specific service:
 ```bash
-docker compose restart sonarr
+docker compose restart mediamanager
 ```
 
 ### Update a specific service:
 ```bash
-docker compose pull radarr
-docker compose up -d radarr
+docker compose pull mediamanager
+docker compose up -d mediamanager
 ```
 
 ## Service Groups
@@ -71,11 +70,10 @@ docker compose up -d radarr
 ### Request Management
 - `jellyseerr.yml` - Media requests
 
-### Media Management (*arr stack)
-- `radarr.yml` - Movies
-- `sonarr.yml` - TV Shows
-- `prowlarr.yml` - Indexers
-- `recyclarr.yml` - Quality profiles
+### Media Management
+- `mediamanager.yml` - Unified TV/Movie management
+- `mediamanager-postgres.yml` - MediaManager database
+- `prowlarr.yml` - Indexer management
 
 ### Download & Streaming
 - `rdtclient.yml` - Real-Debrid client

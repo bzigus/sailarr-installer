@@ -1085,7 +1085,6 @@ if [ "$TRAEFIK_ENABLED" = true ]; then
 else
     echo "   • Prowlarr:      http://${DOMAIN_NAME}:9696  (already configured!)"
     echo "   • MediaManager:  http://${DOMAIN_NAME}:8000  (configure libraries)"
-    echo "   • MediaManager:  http://${DOMAIN_NAME}:8000  (configure libraries)"
     echo "   • Jellyseerr:    http://${DOMAIN_NAME}:5055"
     echo "   • Jellyfin:      http://${DOMAIN_NAME}:8096/web"
 fi

@@ -84,7 +84,7 @@ enabled = true
 host = "http://decypharr"
 port = 8283
 username = "http://mediamanager:8000"
-password = "MEDIAMANAGER_API_KEY_PLACEHOLDER"
+password = "PROWLARR_API_KEY_PLACEHOLDER"
 
 # Transmission settings
 [torrents.transmission]
