@@ -1629,18 +1629,9 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
 
         # 3. Remove depends_on plex block from watchtower
         #    (watchtower is media-server-agnostic and needs no media-server dependency)
-        local watchtower_file="$DOCKER_DIR/compose-services/watchtower.yml"
+        watchtower_file="$DOCKER_DIR/compose-services/watchtower.yml"
         if [ -f "$watchtower_file" ]; then
-            python3 - "$watchtower_file" <<'PYEOF'
-import sys
-fname = sys.argv[1]
-content = open(fname).read()
-content = content.replace(
-    '\n    depends_on:\n      plex:\n        condition: service_healthy\n        restart: true',
-    ''
-)
-open(fname, 'w').write(content)
-PYEOF
+            sed -i '/^    depends_on:/{N;N;N;/plex:/d}' "$watchtower_file"
         fi
 
         echo "✓ docker-compose.yml and service dependencies updated for Jellyfin"
