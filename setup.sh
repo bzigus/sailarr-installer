@@ -1448,7 +1448,7 @@ create_folder "${ROOT_DIR}/config/decypharr-config/rclone" "decypharr:mediacente
 # Create initial config.json
 DECYPHARR_CONFIG='{
   "url_base": "/",
-  "port": "8282",
+  "port": "8283",
   "log_level": "info",
   "debrids": [
     {
