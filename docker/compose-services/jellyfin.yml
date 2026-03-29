@@ -30,3 +30,15 @@ services:
       rclone:
         condition: service_healthy
         restart: true
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.jellyfin.rule=Host(`${JELLYFIN_TRAEFIK_NAME}.${DOMAIN_NAME}`)
+    - traefik.http.routers.jellyfin.entrypoints=websecure
+    - traefik.http.routers.jellyfin.tls=true
+    - traefik.http.routers.jellyfin.tls.certresolver=letsencrypt
+    - traefik.http.routers.jellyfin-http.rule=Host(`${JELLYFIN_TRAEFIK_NAME}.${DOMAIN_NAME}`)
+    - traefik.http.routers.jellyfin-http.entrypoints=web
+    - traefik.http.routers.jellyfin-http.middlewares=jellyfin-https-redirect
+    - traefik.http.middlewares.jellyfin-https-redirect.redirectscheme.scheme=https
+    - traefik.http.middlewares.jellyfin-https-redirect.redirectscheme.permanent=true
+    - traefik.http.services.jellyfin.loadbalancer.server.url=http://${MEDIACENTER_GATEWAY_IP}:${JELLYFIN_PORT}

@@ -176,6 +176,7 @@ AUTH_PASSWORD=${AUTH_PASSWORD:-}
 # TRAEFIK CONFIGURATION
 # =============================================================================
 TRAEFIK_ENABLED=$TRAEFIK_ENABLED
+ACME_EMAIL=${ACME_EMAIL:-}
 
 # =============================================================================
 # DNS/DOMAIN CONFIGURATION
@@ -1183,6 +1184,16 @@ If disabled, services will be accessible via their direct ports." \
             "${DOMAIN_NAME:-mediacenter.local}" \
             "false" \
             "USER_DOMAIN"
+
+        # Ask for ACME/Let's Encrypt email (required for HTTPS certificates)
+        ask_user_input \
+            "HTTPS / Let's Encrypt Email" \
+            "An email address is required by Let's Encrypt to issue TLS certificates for HTTPS.
+Use a real email address for urgent renewal failure notifications and account recovery." \
+            "Enter email address for Let's Encrypt: " \
+            "${ACME_EMAIL:-}" \
+            "false" \
+            "ACME_EMAIL"
     fi
 
     # Check and auto-fix UID/GID conflicts
