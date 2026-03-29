@@ -1677,14 +1677,13 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
         "homarr"
         "dashdot"
         "autoscan"
-        "tautulli"
         "watchtower"
         "pinchflat"
     )
 
     # Add media server specific services
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
-        EXPECTED_SERVICES+=("plex" "plextraktsync")
+        EXPECTED_SERVICES+=("plex" "plextraktsync" "tautulli")
     elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         EXPECTED_SERVICES+=("jellyfin")
     fi
