@@ -4,26 +4,66 @@ This guide covers the manual configuration steps required after running the auto
 
 ## Table of Contents
 
-1. [Overseerr Configuration](#overseerr-configuration)
-   - [Connect Plex Account](#1-connect-plex-account)
+1. [Media Server Setup](#media-server-setup)
+   - [Plex Setup](#plex-setup)
+   - [Jellyfin Setup](#jellyfin-setup)
+2. [Overseerr Configuration](#overseerr-configuration)
+   - [Connect Plex Account](#1-connect-plex-account-plex-installs)
+   - [Connect Jellyfin](#1-connect-jellyfin-jellyfin-installs)
    - [Select Libraries](#2-select-libraries)
    - [Add Radarr Server](#3-add-radarr-server)
    - [Add Sonarr Server](#4-add-sonarr-server)
-2. [Additional Services](#additional-services)
-3. [Troubleshooting](#troubleshooting)
+3. [Additional Services](#additional-services)
+4. [Troubleshooting](#troubleshooting)
+
+---
+
+## Media Server Setup
+
+### Plex Setup
+
+*(Skip this section if you chose Jellyfin during installation.)*
+
+**Access**: `http://YOUR_SERVER_IP:32400/web`
+
+Add media libraries:
+- **Movies**: `/data/media/movies`
+- **TV Shows**: `/data/media/tv`
+- **YouTube** (optional): `/data/media/youtube`
+
+If you provided a Plex claim token during installation, your server should already be linked to your account. Otherwise, sign in through the Plex web UI to link it.
+
+### Jellyfin Setup
+
+*(Skip this section if you chose Plex during installation.)*
+
+**Access**: `http://YOUR_SERVER_IP:8096`
+
+On first launch, the Jellyfin setup wizard will guide you through:
+1. Create an admin user and password
+2. Add media libraries:
+   - **Movies**: `/data/media/movies`
+   - **TV Shows**: `/data/media/tv`
+   - **YouTube** (optional): `/data/media/youtube`
+3. Select metadata language
+4. Complete setup
+
+No Plex account or subscription is required.
 
 ---
 
 ## Overseerr Configuration
 
-Overseerr is your media request management system that connects to Plex, Radarr, and Sonarr.
+Overseerr is your media request management system that connects to your media server, Radarr, and Sonarr.
 
 ### Access Overseerr
 
 1. Open your browser and navigate to: `http://YOUR_SERVER_IP:5055`
 2. You'll be greeted with the Overseerr setup wizard
 
-### 1. Connect Plex Account
+### 1. Connect Plex Account *(Plex installs)*
+
+*(Skip to [Connect Jellyfin](#1-connect-jellyfin-jellyfin-installs) if you chose Jellyfin.)*
 
 **Step 1: Sign in with Plex**
 - Click **"Sign in with Plex"**
@@ -35,12 +75,30 @@ Overseerr is your media request management system that connects to Plex, Radarr,
 - **Server Name**: Leave as default (usually your hostname)
 - Click **Continue**
 
+### 1. Connect Jellyfin *(Jellyfin installs)*
+
+*(Skip this section if you chose Plex.)*
+
+Overseerr supports Jellyfin as a media server backend. On the Overseerr setup wizard:
+
+1. Choose **"Use Jellyfin"** (or skip the Plex sign-in prompt)
+2. Enter your Jellyfin connection details:
+   - **Hostname or IP**: `http://YOUR_SERVER_IP` (use container hostname `jellyfin` for internal)
+   - **Port**: `8096`
+   - **Username**: Your Jellyfin admin username
+   - **Password**: Your Jellyfin admin password
+3. Click **Sign In**
+4. Select your Jellyfin libraries
+5. Click **Continue**
+
+> **Note:** Overseerr's Jellyfin integration may require a newer version of Overseerr. If you encounter issues, check the [Overseerr documentation](https://docs.overseerr.dev/) for Jellyfin setup details.
+
 ### 2. Select Libraries
 
 **Step 3: Library Selection**
 - Enable the libraries you want Overseerr to manage:
-  - ☑ **Movies** (your Plex Movies library)
-  - ☑ **TV Shows** (your Plex TV Shows library)
+  - ☑ **Movies** (your media server Movies library)
+  - ☑ **TV Shows** (your media server TV Shows library)
 - Click **Continue**
 
 ### 3. Add Radarr Server
@@ -158,7 +216,9 @@ Or find it in the installation summary printed at the end of `./setup.sh`.
 
 Homarr provides a unified dashboard for all your services. No additional configuration needed - all services are pre-configured.
 
-### Tautulli (Plex Analytics)
+### Tautulli (Plex Analytics) — *Plex installs only*
+
+*(Tautulli is only installed when Plex is selected as your media server.)*
 
 **Access**: `http://YOUR_SERVER_IP:8282`
 
@@ -187,12 +247,13 @@ No additional configuration needed unless you want to add more indexers.
 | Service | URL | Purpose |
 |---------|-----|---------|
 | **Overseerr** | `http://YOUR_SERVER_IP:5055` | Media requests |
-| **Plex** | `http://YOUR_SERVER_IP:32400/web` | Media server |
+| **Plex** *(if Plex selected)* | `http://YOUR_SERVER_IP:32400/web` | Media server |
+| **Jellyfin** *(if Jellyfin selected)* | `http://YOUR_SERVER_IP:8096` | Media server |
 | **Radarr** | `http://YOUR_SERVER_IP:7878` | Movie management |
 | **Sonarr** | `http://YOUR_SERVER_IP:8989` | TV show management |
 | **Prowlarr** | `http://YOUR_SERVER_IP:9696` | Indexer management |
 | **Homarr** | `http://YOUR_SERVER_IP:7575` | Dashboard |
-| **Tautulli** | `http://YOUR_SERVER_IP:8282` | Plex analytics |
+| **Tautulli** *(Plex only)* | `http://YOUR_SERVER_IP:8282` | Plex analytics |
 | **Zilean** | `http://YOUR_SERVER_IP:8181` | DMM indexer |
 
 ---

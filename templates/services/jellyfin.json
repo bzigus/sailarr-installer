@@ -1,0 +1,32 @@
+{
+  "service": "jellyfin",
+  "description": "Jellyfin Media Server",
+  "compose_file": "jellyfin.yml",
+  "setup": {
+    "steps": [
+      {
+        "action": "wait_for_service",
+        "description": "Waiting for Jellyfin to be ready",
+        "params": {
+          "service": "jellyfin",
+          "port": 8096,
+          "timeout": 120
+        }
+      },
+      {
+        "action": "log_info",
+        "description": "Jellyfin access info",
+        "params": {
+          "message": "Jellyfin Media Server: http://${SERVER_IP}:8096"
+        }
+      },
+      {
+        "action": "log_info",
+        "description": "Jellyfin library setup",
+        "params": {
+          "message": "Add libraries:\n   • Movies: /data/media/movies\n   • TV Shows: /data/media/tv"
+        }
+      }
+    ]
+  }
+}

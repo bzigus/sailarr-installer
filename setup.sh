@@ -149,6 +149,11 @@ TIMEZONE=$USER_TIMEZONE
 ROOT_DIR=$INSTALL_DIR
 
 # =============================================================================
+# MEDIA SERVER SELECTION
+# =============================================================================
+MEDIA_SERVER=$MEDIA_SERVER
+
+# =============================================================================
 # SECRETS & TOKENS - KEEP PRIVATE
 # =============================================================================
 
@@ -190,6 +195,7 @@ RECYCLARR_UID=${RECYCLARR_UID}
 PROWLARR_UID=${PROWLARR_UID}
 OVERSEERR_UID=${OVERSEERR_UID}
 PLEX_UID=${PLEX_UID}
+JELLYFIN_UID=${JELLYFIN_UID}
 DECYPHARR_UID=${DECYPHARR_UID}
 AUTOSCAN_UID=${AUTOSCAN_UID}
 
@@ -624,10 +630,12 @@ show_installation_summary() {
     echo "CREDENTIALS"
     echo "-----------"
     echo "Real-Debrid token:     ${REALDEBRID_TOKEN:0:20}... (configured)"
-    if [ -n "$PLEX_CLAIM" ]; then
-        echo "Plex claim token:      ${PLEX_CLAIM:0:20}... (configured)"
-    else
-        echo "Plex claim token:      (skipped - configure later)"
+    if [ "${MEDIA_SERVER}" = "plex" ]; then
+        if [ -n "$PLEX_CLAIM" ]; then
+            echo "Plex claim token:      ${PLEX_CLAIM:0:20}... (configured)"
+        else
+            echo "Plex claim token:      (skipped - configure later)"
+        fi
     fi
     echo ""
     echo "USERS TO BE CREATED"
@@ -638,7 +646,12 @@ show_installation_summary() {
     echo "  - recyclarr (UID: ${RECYCLARR_UID})"
     echo "  - prowlarr (UID: ${PROWLARR_UID})"
     echo "  - overseerr (UID: ${OVERSEERR_UID})"
-    echo "  - plex (UID: ${PLEX_UID})"
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+        echo "  - plex (UID: ${PLEX_UID})"
+    fi
+    if [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        echo "  - jellyfin (UID: ${JELLYFIN_UID})"
+    fi
     echo "  - decypharr (UID: ${DECYPHARR_UID})"
     echo "  - autoscan (UID: ${AUTOSCAN_UID})"
     echo "  - pinchflat (UID: ${PINCHFLAT_UID})"
@@ -649,7 +662,13 @@ show_installation_summary() {
     echo ""
     echo "DIRECTORIES TO BE CREATED"
     echo "-------------------------"
-    echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,plex,autoscan,zilean,decypharr}-config"
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,plex,autoscan,zilean,decypharr}-config"
+    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,jellyfin,autoscan,zilean,decypharr}-config"
+    else
+        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,autoscan,zilean,decypharr}-config"
+    fi
     echo "  - ${ROOT_DIR}/data/symlinks/{radarr,sonarr}"
     echo "  - ${ROOT_DIR}/data/realdebrid-zurg"
     echo "  - ${ROOT_DIR}/data/media/{movies,tv}"
@@ -1062,15 +1081,50 @@ This is required for Zurg and Decypharr to work." \
         "true" \
         "REALDEBRID_TOKEN"
 
-    # Ask for Plex claim token (optional)
+    # Ask for media server selection
     ask_user_input \
-        "Plex Claim Token (Optional)" \
-        "Get claim token from: https://www.plex.tv/claim/
-NOTE: Claim tokens expire in 4 minutes. Leave empty to configure later." \
-        "Enter Plex claim token [press Enter to skip]: " \
-        "" \
+        "Media Server Selection" \
+        "Choose your media server:
+  1) Plex Media Server (port 32400)
+  2) Jellyfin Media Server (port 8096)
+  3) None (configure manually later)" \
+        "Select media server [1/2/3, default: 1]: " \
+        "1" \
         "false" \
-        "PLEX_CLAIM"
+        "media_server_choice"
+
+    MEDIA_SERVER=""
+    case $media_server_choice in
+        1|"")
+            MEDIA_SERVER="plex"
+            echo "✓ Plex Media Server selected"
+            ;;
+        2)
+            MEDIA_SERVER="jellyfin"
+            echo "✓ Jellyfin Media Server selected"
+            ;;
+        3)
+            MEDIA_SERVER="none"
+            echo "! No media server selected (configure manually later)"
+            ;;
+        *)
+            MEDIA_SERVER="plex"
+            echo "! Invalid choice, defaulting to Plex"
+            ;;
+    esac
+
+    # Ask for Plex claim token (optional, only for Plex)
+    PLEX_CLAIM=""
+    if [ "$MEDIA_SERVER" = "plex" ]; then
+        ask_user_input \
+            "Plex Claim Token (Optional)" \
+            "Get claim token from: https://www.plex.tv/claim/
+NOTE: Claim tokens expire in 4 minutes. Leave empty to configure later." \
+            "Enter Plex claim token [press Enter to skip]: " \
+            "" \
+            "false" \
+            "PLEX_CLAIM"
+    fi
 
     # Ask for authentication credentials (optional)
     ask_user_input \
@@ -1152,6 +1206,7 @@ If disabled, services will be accessible via their direct ports." \
         ["PROWLARR_UID"]="prowlarr"
         ["OVERSEERR_UID"]="overseerr"
         ["PLEX_UID"]="plex"
+        ["JELLYFIN_UID"]="jellyfin"
         ["DECYPHARR_UID"]="decypharr"
         ["AUTOSCAN_UID"]="autoscan"
     )
@@ -1235,7 +1290,11 @@ create_folder "${ROOT_DIR}/config/radarr-config" "$INSTALL_UID:mediacenter" "775
 create_folder "${ROOT_DIR}/config/recyclarr-config" "$INSTALL_UID:mediacenter" "775"
 create_folder "${ROOT_DIR}/config/prowlarr-config" "$INSTALL_UID:mediacenter" "775"
 create_folder "${ROOT_DIR}/config/overseerr-config" "$INSTALL_UID:mediacenter" "775"
-create_folder "${ROOT_DIR}/config/plex-config" "$INSTALL_UID:mediacenter" "775"
+if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+    create_folder "${ROOT_DIR}/config/plex-config" "$INSTALL_UID:mediacenter" "775"
+elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    create_folder "${ROOT_DIR}/config/jellyfin-config" "$INSTALL_UID:mediacenter" "775"
+fi
 create_folder "${ROOT_DIR}/config/autoscan-config" "$INSTALL_UID:mediacenter" "775"
 create_folder "${ROOT_DIR}/config/zilean-config" "$INSTALL_UID:mediacenter" "775"
 create_folder "${ROOT_DIR}/config/decypharr-config" "$INSTALL_UID:mediacenter" "775"
@@ -1261,7 +1320,11 @@ set_permissions "${ROOT_DIR}/config/radarr-config" "" "radarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/recyclarr-config" "" "recyclarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/prowlarr-config" "" "prowlarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/overseerr-config" "" "overseerr:mediacenter"
-set_permissions "${ROOT_DIR}/config/plex-config" "" "plex:mediacenter"
+if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+    set_permissions "${ROOT_DIR}/config/plex-config" "" "plex:mediacenter"
+elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    set_permissions "${ROOT_DIR}/config/jellyfin-config" "" "jellyfin:mediacenter"
+fi
 set_permissions "${ROOT_DIR}/config/decypharr-config" "" "decypharr:mediacenter"
 set_permissions "${ROOT_DIR}/config/autoscan-config" "" "autoscan:mediacenter"
 set_permissions "${ROOT_DIR}/config/pinchflat-config" "" "pinchflat:mediacenter"
@@ -1475,7 +1538,15 @@ if [[ $healthcheck_choice =~ ^[Yy]$ ]]; then
 
     # Copy healthcheck scripts to /usr/local/bin/
     copy_file "$SCRIPT_DIR/scripts/health/arrs-mount-healthcheck.sh" "/usr/local/bin/arrs-mount-healthcheck.sh" "$USER:$USER" "775"
-    copy_file "$SCRIPT_DIR/scripts/health/plex-mount-healthcheck.sh" "/usr/local/bin/plex-mount-healthcheck.sh" "$USER:$USER" "775"
+
+    # Install the appropriate media server healthcheck script
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+        copy_file "$SCRIPT_DIR/scripts/health/plex-mount-healthcheck.sh" "/usr/local/bin/plex-mount-healthcheck.sh" "$USER:$USER" "775"
+        MEDIA_HEALTHCHECK_SCRIPT="plex-mount-healthcheck"
+    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        copy_file "$SCRIPT_DIR/scripts/health/jellyfin-mount-healthcheck.sh" "/usr/local/bin/jellyfin-mount-healthcheck.sh" "$USER:$USER" "775"
+        MEDIA_HEALTHCHECK_SCRIPT="jellyfin-mount-healthcheck"
+    fi
 
     # Create logs directory
     create_folder "${ROOT_DIR}/logs" "$USER:$USER" "755"
@@ -1497,12 +1568,16 @@ if [[ $healthcheck_choice =~ ^[Yy]$ ]]; then
     if [[ $cron_choice =~ ^[Yy]$ ]]; then
         # Add cron jobs if they don't already exist
         (crontab -l 2>/dev/null | grep -v "arrs-mount-healthcheck"; echo "*/30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh") | crontab -
-        (crontab -l 2>/dev/null | grep -v "plex-mount-healthcheck"; echo "*/35 * * * * /usr/local/bin/plex-mount-healthcheck.sh") | crontab -
+        if [ -n "${MEDIA_HEALTHCHECK_SCRIPT:-}" ]; then
+            (crontab -l 2>/dev/null | grep -v "${MEDIA_HEALTHCHECK_SCRIPT}"; echo "*/35 * * * * /usr/local/bin/${MEDIA_HEALTHCHECK_SCRIPT}.sh") | crontab -
+        fi
         echo "✓ Cron jobs added successfully"
     else
         echo "Skipping cron job configuration. You can add them manually later:"
         echo "  */30 * * * * /usr/local/bin/arrs-mount-healthcheck.sh"
-        echo "  */35 * * * * /usr/local/bin/plex-mount-healthcheck.sh"
+        if [ -n "${MEDIA_HEALTHCHECK_SCRIPT:-}" ]; then
+            echo "  */35 * * * * /usr/local/bin/${MEDIA_HEALTHCHECK_SCRIPT}.sh"
+        fi
     fi
 else
     echo "Skipping mount healthcheck installation."
@@ -1532,6 +1607,17 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
 
     # Determine docker directory location
     DOCKER_DIR="${ROOT_DIR}/docker"
+
+    # Patch docker-compose.yml for the selected media server
+    if [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        echo "Configuring docker-compose.yml for Jellyfin..."
+        # Replace plex.yml with jellyfin.yml and remove plextraktsync
+        sed -i \
+            -e 's|compose-services/plex\.yml|compose-services/jellyfin.yml|g' \
+            -e '/compose-services\/plextraktsync\.yml/d' \
+            "$DOCKER_DIR/docker-compose.yml"
+        echo "✓ docker-compose.yml updated for Jellyfin"
+    fi
 
     # Generate .env.local from .env.install for docker compose
     echo "Creating .env.local from .env.install..."
@@ -1568,7 +1654,6 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
         "radarr"
         "sonarr"
         "overseerr"
-        "plex"
         "zilean"
         "zilean-postgres"
         "homarr"
@@ -1576,9 +1661,15 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
         "autoscan"
         "tautulli"
         "watchtower"
-        "plextraktsync"
         "pinchflat"
     )
+
+    # Add media server specific services
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+        EXPECTED_SERVICES+=("plex" "plextraktsync")
+    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        EXPECTED_SERVICES+=("jellyfin")
+    fi
 
     # Add traefik services if enabled
     if [ "$TRAEFIK_ENABLED" = true ]; then
@@ -1952,8 +2043,16 @@ echo "             - Radarr/Sonarr sync enabled (indexers auto-synced)"
 echo "  ✓ Recyclarr - Quality profiles and naming conventions from TRaSH Guides"
 echo ""
 echo "SERVICES REQUIRING MANUAL CONFIGURATION:"
-echo "  • Plex - Add media libraries (/data/media/movies, /data/media/tv)"
-echo "  • Overseerr - Connect to Plex and Radarr/Sonarr (optional)"
+if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+    echo "  • Plex - Add media libraries (/data/media/movies, /data/media/tv)"
+    echo "  • Overseerr - Connect to Plex and Radarr/Sonarr (optional)"
+elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    echo "  • Jellyfin - Add media libraries (/data/media/movies, /data/media/tv)"
+    echo "  • Overseerr - Connect to Jellyfin and Radarr/Sonarr (optional)"
+else
+    echo "  • Media Server - Add media libraries (/data/media/movies, /data/media/tv)"
+    echo "  • Overseerr - Connect to your media server and Radarr/Sonarr (optional)"
+fi
 echo "  • Prowlarr - Add more indexers if needed (optional)"
 echo ""
 echo "IMPORTANT - ZILEAN INDEXER:"
@@ -1970,17 +2069,26 @@ if [ "$TRAEFIK_ENABLED" = true ]; then
     echo "   • Radarr:    http://radarr.${DOMAIN_NAME}    (already configured!)"
     echo "   • Sonarr:    http://sonarr.${DOMAIN_NAME}    (already configured!)"
     echo "   • Overseerr: http://overseerr.${DOMAIN_NAME}"
-    echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+        echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
+    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        echo "   • Jellyfin:  https://jellyfin.${DOMAIN_NAME}"
+    fi
 else
     echo "   • Prowlarr:  http://${DOMAIN_NAME}:9696  (already configured!)"
     echo "   • Radarr:    http://${DOMAIN_NAME}:7878  (already configured!)"
     echo "   • Sonarr:    http://${DOMAIN_NAME}:8989  (already configured!)"
     echo "   • Overseerr: http://${DOMAIN_NAME}:5055"
-    echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
+        echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
+    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+        echo "   • Jellyfin:  http://${DOMAIN_NAME}:8096"
+    fi
 fi
 echo ""
 echo "2. Configure remaining services manually:"
 echo ""
+if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
 echo "   PLEX - Add media libraries:"
 echo "   • Movies: /data/media/movies"
 echo "   • TV Shows: /data/media/tv"
@@ -1992,13 +2100,25 @@ echo "   • Add Radarr and Sonarr with their API keys (see below)"
 echo "   • Configure quality profiles and root folders"
 echo "   • Detailed guide: docker/POST-INSTALL.md"
 echo ""
+echo "   TAUTULLI - Connect to Plex for statistics (optional)"
+elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+echo "   JELLYFIN - Add media libraries:"
+echo "   • Movies: /data/media/movies"
+echo "   • TV Shows: /data/media/tv"
+echo "   • YouTube: /data/media/youtube"
+echo ""
+echo "   OVERSEERR - Connect to Jellyfin and Radarr/Sonarr:"
+echo "   • Add Radarr and Sonarr with their API keys (see below)"
+echo "   • Configure quality profiles and root folders"
+echo "   • Detailed guide: docker/POST-INSTALL.md"
+fi
+echo ""
 echo "   API KEYS FOR OVERSEERR CONFIGURATION:"
 echo "   • Radarr API Key: ${RADARR_API_KEY}"
 echo "   • Sonarr API Key: ${SONARR_API_KEY}"
 echo "   • Prowlarr API Key: ${PROWLARR_API_KEY}"
 echo ""
 echo "   PINCHFLAT - Configure YouTube downloads (optional)"
-echo "   TAUTULLI - Connect to Plex for statistics (optional)"
 echo ""
 echo "   RECYCLARR - Update quality profiles (optional):"
 echo "   • To manually update profiles: cd ${ROOT_DIR} && ./recyclarr-sync.sh"
