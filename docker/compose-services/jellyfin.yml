@@ -18,7 +18,7 @@ services:
       - ${ROOT_DIR}/config/jellyfin-config:/config
       - ${ROOT_DIR}/data:/data
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8096/health && test -d /data/realdebrid-zurg && mountpoint -q /data/realdebrid-zurg"]
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8096/health | grep -q Healthy && test -d /data/realdebrid-zurg && mountpoint -q /data/realdebrid-zurg"]
       interval: 30s
       timeout: 10s
       retries: 5

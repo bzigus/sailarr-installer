@@ -630,7 +630,7 @@ show_installation_summary() {
     echo "CREDENTIALS"
     echo "-----------"
     echo "Real-Debrid token:     ${REALDEBRID_TOKEN:0:20}... (configured)"
-    if [ "${MEDIA_SERVER}" = "plex" ]; then
+    if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         if [ -n "$PLEX_CLAIM" ]; then
             echo "Plex claim token:      ${PLEX_CLAIM:0:20}... (configured)"
         else
@@ -649,10 +649,9 @@ show_installation_summary() {
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "  - plex (UID: ${PLEX_UID})"
     fi
-    if [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    if [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         echo "  - jellyfin (UID: ${JELLYFIN_UID})"
     fi
-    echo "  - decypharr (UID: ${DECYPHARR_UID})"
     echo "  - autoscan (UID: ${AUTOSCAN_UID})"
     echo "  - pinchflat (UID: ${PINCHFLAT_UID})"
     echo ""
@@ -664,7 +663,7 @@ show_installation_summary() {
     echo "-------------------------"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,plex,autoscan,zilean,decypharr}-config"
-    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,jellyfin,autoscan,zilean,decypharr}-config"
     else
         echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,autoscan,zilean,decypharr}-config"
@@ -1292,7 +1291,7 @@ create_folder "${ROOT_DIR}/config/prowlarr-config" "$INSTALL_UID:mediacenter" "7
 create_folder "${ROOT_DIR}/config/overseerr-config" "$INSTALL_UID:mediacenter" "775"
 if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
     create_folder "${ROOT_DIR}/config/plex-config" "$INSTALL_UID:mediacenter" "775"
-elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
     create_folder "${ROOT_DIR}/config/jellyfin-config" "$INSTALL_UID:mediacenter" "775"
 fi
 create_folder "${ROOT_DIR}/config/autoscan-config" "$INSTALL_UID:mediacenter" "775"
@@ -1322,7 +1321,7 @@ set_permissions "${ROOT_DIR}/config/prowlarr-config" "" "prowlarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/overseerr-config" "" "overseerr:mediacenter"
 if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
     set_permissions "${ROOT_DIR}/config/plex-config" "" "plex:mediacenter"
-elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
     set_permissions "${ROOT_DIR}/config/jellyfin-config" "" "jellyfin:mediacenter"
 fi
 set_permissions "${ROOT_DIR}/config/decypharr-config" "" "decypharr:mediacenter"
@@ -1543,7 +1542,7 @@ if [[ $healthcheck_choice =~ ^[Yy]$ ]]; then
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         copy_file "$SCRIPT_DIR/scripts/health/plex-mount-healthcheck.sh" "/usr/local/bin/plex-mount-healthcheck.sh" "$USER:$USER" "775"
         MEDIA_HEALTHCHECK_SCRIPT="plex-mount-healthcheck"
-    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         copy_file "$SCRIPT_DIR/scripts/health/jellyfin-mount-healthcheck.sh" "/usr/local/bin/jellyfin-mount-healthcheck.sh" "$USER:$USER" "775"
         MEDIA_HEALTHCHECK_SCRIPT="jellyfin-mount-healthcheck"
     fi
@@ -1609,7 +1608,7 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
     DOCKER_DIR="${ROOT_DIR}/docker"
 
     # Patch docker-compose.yml for the selected media server
-    if [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    if [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         echo "Configuring docker-compose.yml for Jellyfin..."
         # Replace plex.yml with jellyfin.yml and remove plextraktsync
         sed -i \
@@ -1667,7 +1666,7 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
     # Add media server specific services
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         EXPECTED_SERVICES+=("plex" "plextraktsync")
-    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         EXPECTED_SERVICES+=("jellyfin")
     fi
 
@@ -2046,7 +2045,7 @@ echo "SERVICES REQUIRING MANUAL CONFIGURATION:"
 if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
     echo "  • Plex - Add media libraries (/data/media/movies, /data/media/tv)"
     echo "  • Overseerr - Connect to Plex and Radarr/Sonarr (optional)"
-elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
     echo "  • Jellyfin - Add media libraries (/data/media/movies, /data/media/tv)"
     echo "  • Overseerr - Connect to Jellyfin and Radarr/Sonarr (optional)"
 else
@@ -2071,7 +2070,7 @@ if [ "$TRAEFIK_ENABLED" = true ]; then
     echo "   • Overseerr: http://overseerr.${DOMAIN_NAME}"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
-    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         echo "   • Jellyfin:  https://jellyfin.${DOMAIN_NAME}"
     fi
 else
@@ -2081,7 +2080,7 @@ else
     echo "   • Overseerr: http://${DOMAIN_NAME}:5055"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
-    elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+    elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         echo "   • Jellyfin:  http://${DOMAIN_NAME}:8096"
     fi
 fi
@@ -2101,7 +2100,7 @@ echo "   • Configure quality profiles and root folders"
 echo "   • Detailed guide: docker/POST-INSTALL.md"
 echo ""
 echo "   TAUTULLI - Connect to Plex for statistics (optional)"
-elif [ "${MEDIA_SERVER}" = "jellyfin" ]; then
+elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
 echo "   JELLYFIN - Add media libraries:"
 echo "   • Movies: /data/media/movies"
 echo "   • TV Shows: /data/media/tv"
