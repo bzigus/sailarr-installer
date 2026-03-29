@@ -1610,12 +1610,40 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
     # Patch docker-compose.yml for the selected media server
     if [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
         echo "Configuring docker-compose.yml for Jellyfin..."
-        # Replace plex.yml with jellyfin.yml and remove plextraktsync
+
+        # 1. Replace plex.yml with jellyfin.yml; remove Plex-only service includes
         sed -i \
             -e 's|compose-services/plex\.yml|compose-services/jellyfin.yml|g' \
             -e '/compose-services\/plextraktsync\.yml/d' \
+            -e '/compose-services\/tautulli\.yml/d' \
             "$DOCKER_DIR/docker-compose.yml"
-        echo "✓ docker-compose.yml updated for Jellyfin"
+
+        # 2. Update autoscan and pinchflat: replace plex dependency with jellyfin
+        for svc_file in \
+            "$DOCKER_DIR/compose-services/autoscan.yml" \
+            "$DOCKER_DIR/compose-services/pinchflat.yml"; do
+            if [ -f "$svc_file" ]; then
+                sed -i 's/^      plex:$/      jellyfin:/' "$svc_file"
+            fi
+        done
+
+        # 3. Remove depends_on plex block from watchtower
+        #    (watchtower is media-server-agnostic and needs no media-server dependency)
+        local watchtower_file="$DOCKER_DIR/compose-services/watchtower.yml"
+        if [ -f "$watchtower_file" ]; then
+            python3 - "$watchtower_file" <<'PYEOF'
+import sys
+fname = sys.argv[1]
+content = open(fname).read()
+content = content.replace(
+    '\n    depends_on:\n      plex:\n        condition: service_healthy\n        restart: true',
+    ''
+)
+open(fname, 'w').write(content)
+PYEOF
+        fi
+
+        echo "✓ docker-compose.yml and service dependencies updated for Jellyfin"
     fi
 
     # Generate .env.local from .env.install for docker compose
