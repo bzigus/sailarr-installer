@@ -58,7 +58,8 @@
           "api_key_var": "SONARR_API_KEY",
           "client_name": "Decypharr",
           "client_host": "decypharr",
-          "client_port": 8283
+          "client_port": 8283,
+          "category": "tv"
         }
       },
       {
