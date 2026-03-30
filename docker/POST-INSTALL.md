@@ -7,7 +7,7 @@ This guide covers the manual configuration steps required after running the auto
 1. [Media Server Setup](#media-server-setup)
    - [Plex Setup](#plex-setup)
    - [Jellyfin Setup](#jellyfin-setup)
-2. [Overseerr Configuration](#overseerr-configuration)
+2. [Seerr Configuration](#seerr-configuration)
    - [Connect Plex Account](#1-connect-plex-account-plex-installs)
    - [Connect Jellyfin](#1-connect-jellyfin-jellyfin-installs)
    - [Select Libraries](#2-select-libraries)
@@ -52,14 +52,14 @@ No Plex account or subscription is required.
 
 ---
 
-## Overseerr Configuration
+## Seerr Configuration
 
-Overseerr is your media request management system that connects to your media server, Radarr, and Sonarr.
+Seerr is your media request management system that connects to your media server, Radarr, and Sonarr. It supports Plex, Jellyfin, and Emby.
 
-### Access Overseerr
+### Access Seerr
 
 1. Open your browser and navigate to: `http://YOUR_SERVER_IP:5055`
-2. You'll be greeted with the Overseerr setup wizard
+2. You'll be greeted with the Seerr setup wizard
 
 ### 1. Connect Plex Account *(Plex installs)*
 
@@ -67,7 +67,7 @@ Overseerr is your media request management system that connects to your media se
 
 **Step 1: Sign in with Plex**
 - Click **"Sign in with Plex"**
-- Authorize Overseerr to access your Plex account
+- Authorize Seerr to access your Plex account
 - Select your Plex server from the list
 
 **Step 2: Server Configuration**
@@ -79,7 +79,7 @@ Overseerr is your media request management system that connects to your media se
 
 *(Skip this section if you chose Plex.)*
 
-Overseerr supports Jellyfin as a media server backend. On the Overseerr setup wizard:
+In the Seerr setup wizard:
 
 1. Choose **"Use Jellyfin"** (or skip the Plex sign-in prompt)
 2. Enter your Jellyfin connection details:
@@ -91,12 +91,10 @@ Overseerr supports Jellyfin as a media server backend. On the Overseerr setup wi
 4. Select your Jellyfin libraries
 5. Click **Continue**
 
-> **Note:** Overseerr's Jellyfin integration may require a newer version of Overseerr. If you encounter issues, check the [Overseerr documentation](https://docs.overseerr.dev/) for Jellyfin setup details.
-
 ### 2. Select Libraries
 
 **Step 3: Library Selection**
-- Enable the libraries you want Overseerr to manage:
+- Enable the libraries you want Seerr to manage:
   - ☑ **Movies** (your media server Movies library)
   - ☑ **TV Shows** (your media server TV Shows library)
 - Click **Continue**
@@ -201,10 +199,10 @@ Or find it in the installation summary printed at the end of `./setup.sh`.
 
 ### 5. Finish Setup
 
-**Step 6: Complete Overseerr Setup**
+**Step 6: Complete Seerr Setup**
 - Review your settings
 - Click **"Finish Setup"**
-- Overseerr is now ready to use!
+- Seerr is now ready to use!
 
 ---
 
@@ -246,7 +244,7 @@ No additional configuration needed unless you want to add more indexers.
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| **Overseerr** | `http://YOUR_SERVER_IP:5055` | Media requests |
+| **Seerr** | `http://YOUR_SERVER_IP:5055` | Media requests |
 | **Plex** *(if Plex selected)* | `http://YOUR_SERVER_IP:32400/web` | Media server |
 | **Jellyfin** *(if Jellyfin selected)* | `http://YOUR_SERVER_IP:8096` | Media server |
 | **Radarr** | `http://YOUR_SERVER_IP:7878` | Movie management |
@@ -260,7 +258,7 @@ No additional configuration needed unless you want to add more indexers.
 
 ## Troubleshooting
 
-### Overseerr Can't Connect to Radarr/Sonarr
+### Seerr Can't Connect to Radarr/Sonarr
 
 **Problem**: Test button fails with connection error
 
@@ -286,7 +284,7 @@ No additional configuration needed unless you want to add more indexers.
 
 4. Check Docker network:
    ```bash
-   docker network inspect mediacenter | grep -A 5 overseerr
+   docker network inspect mediacenter | grep -A 5 seerr
    ```
 
 ### Quality Profiles Not Loading
@@ -333,7 +331,7 @@ If you encounter issues:
 
 1. Check service logs:
    ```bash
-   docker logs overseerr
+   docker logs seerr
    docker logs radarr
    docker logs sonarr
    ```
@@ -356,4 +354,4 @@ If you encounter issues:
 
 **Configuration complete!** 🎉
 
-You can now start requesting media through Overseerr. Movies and TV shows will be automatically downloaded and organized by Radarr/Sonarr.
+You can now start requesting media through Seerr. Movies and TV shows will be automatically downloaded and organized by Radarr/Sonarr.

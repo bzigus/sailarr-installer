@@ -193,7 +193,7 @@ SONARR_UID=${SONARR_UID}
 RADARR_UID=${RADARR_UID}
 RECYCLARR_UID=${RECYCLARR_UID}
 PROWLARR_UID=${PROWLARR_UID}
-OVERSEERR_UID=${OVERSEERR_UID}
+SEERR_UID=${SEERR_UID}
 PLEX_UID=${PLEX_UID}
 JELLYFIN_UID=${JELLYFIN_UID}
 DECYPHARR_UID=${DECYPHARR_UID}
@@ -645,7 +645,7 @@ show_installation_summary() {
     echo "  - radarr (UID: ${RADARR_UID})"
     echo "  - recyclarr (UID: ${RECYCLARR_UID})"
     echo "  - prowlarr (UID: ${PROWLARR_UID})"
-    echo "  - overseerr (UID: ${OVERSEERR_UID})"
+    echo "  - seerr (UID: ${SEERR_UID})"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "  - plex (UID: ${PLEX_UID})"
     fi
@@ -662,11 +662,11 @@ show_installation_summary() {
     echo "DIRECTORIES TO BE CREATED"
     echo "-------------------------"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
-        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,plex,autoscan,zilean,decypharr}-config"
+        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,seerr,plex,autoscan,zilean,decypharr}-config"
     elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
-        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,jellyfin,autoscan,zilean,decypharr}-config"
+        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,seerr,jellyfin,autoscan,zilean,decypharr}-config"
     else
-        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,overseerr,autoscan,zilean,decypharr}-config"
+        echo "  - ${ROOT_DIR}/config/{sonarr,radarr,recyclarr,prowlarr,seerr,autoscan,zilean,decypharr}-config"
     fi
     echo "  - ${ROOT_DIR}/data/symlinks/{radarr,sonarr}"
     echo "  - ${ROOT_DIR}/data/realdebrid-zurg"
@@ -1203,7 +1203,7 @@ If disabled, services will be accessible via their direct ports." \
         ["RADARR_UID"]="radarr"
         ["RECYCLARR_UID"]="recyclarr"
         ["PROWLARR_UID"]="prowlarr"
-        ["OVERSEERR_UID"]="overseerr"
+        ["SEERR_UID"]="seerr"
         ["PLEX_UID"]="plex"
         ["JELLYFIN_UID"]="jellyfin"
         ["DECYPHARR_UID"]="decypharr"
@@ -1288,7 +1288,7 @@ create_folder "${ROOT_DIR}/config/sonarr-config" "$INSTALL_UID:mediacenter" "775
 create_folder "${ROOT_DIR}/config/radarr-config" "$INSTALL_UID:mediacenter" "775"
 create_folder "${ROOT_DIR}/config/recyclarr-config" "$INSTALL_UID:mediacenter" "775"
 create_folder "${ROOT_DIR}/config/prowlarr-config" "$INSTALL_UID:mediacenter" "775"
-create_folder "${ROOT_DIR}/config/overseerr-config" "$INSTALL_UID:mediacenter" "775"
+create_folder "${ROOT_DIR}/config/seerr-config" "$INSTALL_UID:mediacenter" "775"
 if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
     create_folder "${ROOT_DIR}/config/plex-config" "$INSTALL_UID:mediacenter" "775"
 elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
@@ -1318,7 +1318,7 @@ set_permissions "${ROOT_DIR}/config/sonarr-config" "" "sonarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/radarr-config" "" "radarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/recyclarr-config" "" "recyclarr:mediacenter"
 set_permissions "${ROOT_DIR}/config/prowlarr-config" "" "prowlarr:mediacenter"
-set_permissions "${ROOT_DIR}/config/overseerr-config" "" "overseerr:mediacenter"
+set_permissions "${ROOT_DIR}/config/seerr-config" "" "seerr:mediacenter"
 if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
     set_permissions "${ROOT_DIR}/config/plex-config" "" "plex:mediacenter"
 elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
@@ -1671,7 +1671,7 @@ if [[ $autoconfig_choice =~ ^[Yy]$ ]]; then
         "prowlarr"
         "radarr"
         "sonarr"
-        "overseerr"
+        "seerr"
         "zilean"
         "zilean-postgres"
         "homarr"
@@ -2062,13 +2062,13 @@ echo ""
 echo "SERVICES REQUIRING MANUAL CONFIGURATION:"
 if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
     echo "  • Plex - Add media libraries (/data/media/movies, /data/media/tv)"
-    echo "  • Overseerr - Connect to Plex and Radarr/Sonarr (optional)"
+    echo "  • Seerr - Connect to Plex and Radarr/Sonarr (optional)"
 elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
     echo "  • Jellyfin - Add media libraries (/data/media/movies, /data/media/tv)"
-    echo "  • Overseerr - Connect to Jellyfin and Radarr/Sonarr (optional)"
+    echo "  • Seerr - Connect to Jellyfin and Radarr/Sonarr (optional)"
 else
     echo "  • Media Server - Add media libraries (/data/media/movies, /data/media/tv)"
-    echo "  • Overseerr - Connect to your media server and Radarr/Sonarr (optional)"
+    echo "  • Seerr - Connect to your media server and Radarr/Sonarr (optional)"
 fi
 echo "  • Prowlarr - Add more indexers if needed (optional)"
 echo ""
@@ -2085,7 +2085,7 @@ if [ "$TRAEFIK_ENABLED" = true ]; then
     echo "   • Prowlarr:  http://prowlarr.${DOMAIN_NAME}  (already configured!)"
     echo "   • Radarr:    http://radarr.${DOMAIN_NAME}    (already configured!)"
     echo "   • Sonarr:    http://sonarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Overseerr: http://overseerr.${DOMAIN_NAME}"
+    echo "   • Seerr:    http://seerr.${DOMAIN_NAME}"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
     elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
@@ -2095,7 +2095,7 @@ else
     echo "   • Prowlarr:  http://${DOMAIN_NAME}:9696  (already configured!)"
     echo "   • Radarr:    http://${DOMAIN_NAME}:7878  (already configured!)"
     echo "   • Sonarr:    http://${DOMAIN_NAME}:8989  (already configured!)"
-    echo "   • Overseerr: http://${DOMAIN_NAME}:5055"
+    echo "   • Seerr:    http://${DOMAIN_NAME}:5055"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
     elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then
@@ -2111,7 +2111,7 @@ echo "   • Movies: /data/media/movies"
 echo "   • TV Shows: /data/media/tv"
 echo "   • YouTube: /data/media/youtube"
 echo ""
-echo "   OVERSEERR - Connect to Plex and Radarr/Sonarr:"
+echo "   SEERR - Connect to Plex and Radarr/Sonarr:"
 echo "   • Sign in with Plex account"
 echo "   • Add Radarr and Sonarr with their API keys (see below)"
 echo "   • Configure quality profiles and root folders"
@@ -2124,13 +2124,13 @@ echo "   • Movies: /data/media/movies"
 echo "   • TV Shows: /data/media/tv"
 echo "   • YouTube: /data/media/youtube"
 echo ""
-echo "   OVERSEERR - Connect to Jellyfin and Radarr/Sonarr:"
+echo "   SEERR - Connect to Jellyfin and Radarr/Sonarr:"
 echo "   • Add Radarr and Sonarr with their API keys (see below)"
 echo "   • Configure quality profiles and root folders"
 echo "   • Detailed guide: docker/POST-INSTALL.md"
 fi
 echo ""
-echo "   API KEYS FOR OVERSEERR CONFIGURATION:"
+echo "   API KEYS FOR SEERR CONFIGURATION:"
 echo "   • Radarr API Key: ${RADARR_API_KEY}"
 echo "   • Sonarr API Key: ${SONARR_API_KEY}"
 echo "   • Prowlarr API Key: ${PROWLARR_API_KEY}"
