@@ -26,8 +26,8 @@ Before starting the installation, ensure you have:
    - Get your API token from https://real-debrid.com/apitoken
    - Keep this token ready for the installation
 
-4. **Plex claim token (optional)**
-   - Only needed if you want hardware transcoding or remote access
+4. **Plex claim token (optional, Plex installs only)**
+   - Only needed if you selected Plex and want hardware transcoding or remote access
    - Get it from https://www.plex.tv/claim/
    - The token expires after 4 minutes, so get it right before installation
 
@@ -111,7 +111,28 @@ Enter your Real-Debrid API token (get it from https://real-debrid.com/apitoken):
 - Zurg: To mount your Real-Debrid library
 - Decypharr: To add torrents to Real-Debrid
 
-### Question 3: Plex Claim Token (Optional)
+### Question 3: Media Server Selection
+
+```
+Choose your media server:
+  1) Plex Media Server (port 32400)
+  2) Jellyfin Media Server (port 8096)
+  3) None (configure manually later)
+Select media server [1/2/3, default: 1]:
+```
+
+**What it does:** Selects which media server to install and configure.
+
+**Options:**
+- **Plex** - Popular commercial media server with excellent app support and hardware transcoding. Free for local use, Plex Pass subscription needed for some features.
+- **Jellyfin** - Free and open-source media server. No subscription required, all features available. Great alternative to Plex.
+- **None** - Skip media server installation; you can add one manually later.
+
+**Default:** Plex (press Enter to select)
+
+### Question 4: Plex Claim Token (Optional, Plex only)
+
+*This question is only shown when Plex is selected.*
 
 ```
 Enter your Plex claim token (optional, get it from https://www.plex.tv/claim/):
@@ -146,7 +167,7 @@ Press Enter to skip if you don't want to claim the server now.
 2. Logging in with your Plex account
 3. Following the setup wizard
 
-### Question 4: Timezone
+### Question 5: Timezone
 
 ```
 Enter timezone [press Enter for default]:
@@ -160,7 +181,7 @@ Enter timezone [press Enter for default]:
 - Use the format `Continent/City` (e.g., `America/New_York`, `America/Los_Angeles`, `Asia/Tokyo`)
 - Check available timezones: `timedatectl list-timezones`
 
-### Question 5: Authentication (Optional)
+### Question 6: Authentication (Optional)
 
 ```
 Do you want to configure authentication? (y/n):
@@ -182,7 +203,7 @@ Do you want to configure authentication? (y/n):
 - **Username:** Your login username
 - **Password:** Your password (hidden when typing)
 
-### Question 6: Traefik (Reverse Proxy)
+### Question 7: Traefik (Reverse Proxy)
 
 ```
 Do you want to enable Traefik? (y/n):
@@ -258,7 +279,8 @@ After answering all questions, the installer will:
 **Services started:**
 - Zurg (Real-Debrid WebDAV)
 - Rclone (Mount manager)
-- Plex Media Server
+- Plex Media Server *(if Plex selected)*
+- Jellyfin Media Server *(if Jellyfin selected)*
 - Radarr (Movies)
 - Sonarr (TV Shows)
 - Prowlarr (Indexers)

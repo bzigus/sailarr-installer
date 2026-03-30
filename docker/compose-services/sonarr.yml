@@ -29,7 +29,7 @@ services:
     - /logs:mode=770,size=100M,uid=${SONARR_UID},gid=${MEDIACENTER_GID}
     volumes:
     - ${ROOT_DIR}/config/sonarr-config:/config
-    - ${ROOT_DIR}/data:/data
+    - ${ROOT_DIR}/data:/data:rslave
     ports:
     - ${SONARR_PORT}:8989
     restart: on-failure:5
@@ -40,6 +40,9 @@ services:
         max-size: 10m
     depends_on:
       prowlarr:
+        condition: service_healthy
+        restart: true
+      rclone:
         condition: service_healthy
         restart: true
     labels:

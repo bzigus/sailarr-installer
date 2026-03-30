@@ -28,7 +28,7 @@ services:
     - /logs:mode=770,size=100M,uid=${RADARR_UID},gid=${MEDIACENTER_GID}
     volumes:
     - ${ROOT_DIR}/config/radarr-config:/config
-    - ${ROOT_DIR}/data:/data
+    - ${ROOT_DIR}/data:/data:rslave
     ports:
     - ${RADARR_PORT}:7878
     restart: on-failure:5
@@ -44,5 +44,8 @@ services:
     - traefik.http.services.radarr.loadbalancer.server.port=7878
     depends_on:
       prowlarr:
+        condition: service_healthy
+        restart: true
+      rclone:
         condition: service_healthy
         restart: true

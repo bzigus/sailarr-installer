@@ -51,10 +51,9 @@ get_available_templates() {
         if [ -d "${TEMPLATES_DIR}/mediaplayers/plex" ]; then
             templates+=("mediaplayers/plex")
         fi
-        # Add jellyfin when available
-        # if [ -d "${TEMPLATES_DIR}/mediaplayers/jellyfin" ]; then
-        #     templates+=("mediaplayers/jellyfin")
-        # fi
+        if [ -d "${TEMPLATES_DIR}/mediaplayers/jellyfin" ]; then
+            templates+=("mediaplayers/jellyfin")
+        fi
     fi
 
     # Extras - filter based on selected media server
@@ -111,9 +110,10 @@ interactive_select() {
     echo "Select your media server (required):"
     echo ""
     echo "  1) Plex Media Server"
-    echo "  2) None (manual setup later)"
+    echo "  2) Jellyfin Media Server"
+    echo "  3) None (manual setup later)"
     echo ""
-    read -p "Select option [1-2]: " media_choice
+    read -p "Select option [1-3]: " media_choice
     echo ""
 
     SELECTED_MEDIA_SERVER=""
@@ -123,6 +123,10 @@ interactive_select() {
             echo -e "${GREEN}✓${NC} Plex Media Server selected"
             ;;
         2)
+            SELECTED_MEDIA_SERVER="mediaplayers/jellyfin"
+            echo -e "${GREEN}✓${NC} Jellyfin Media Server selected"
+            ;;
+        3)
             echo -e "${YELLOW}!${NC} No media server selected (you'll need to set one up manually)"
             ;;
         *)

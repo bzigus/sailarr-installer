@@ -25,12 +25,12 @@ services:
     tmpfs:
     - /tmp:mode=770,noexec,size=100M,uid=${DECYPHARR_UID},gid=${MEDIACENTER_GID}
     ports:
-    - ${DECYPHARR_PORT}:8282
+    - ${DECYPHARR_PORT}:8283
     labels:
     - traefik.enable=true
     - traefik.http.routers.decypharr.rule=Host(`decypharr.${DOMAIN_NAME}`)
     - traefik.http.routers.decypharr.entrypoints=web
-    - traefik.http.services.decypharr.loadbalancer.server.port=8282
+    - traefik.http.services.decypharr.loadbalancer.server.port=8283
     volumes:
     # Config directory
     - ${ROOT_DIR}/config/decypharr-config:/app
@@ -38,8 +38,8 @@ services:
     - ${ROOT_DIR}/data:/data
     # Symlinks directory
     - ${ROOT_DIR}/data/symlinks:/data/symlinks:rw
-    # Mount propagation for FUSE
-    - /mnt/mediacenter:/mnt/mediacenter:rshared
+    # Mount propagation for FUSE - uses ROOT_DIR so the rclone FUSE submount is visible
+    - ${ROOT_DIR}:${ROOT_DIR}:rshared
     restart: on-failure:5
     devices:
     - /dev/fuse:/dev/fuse:rwm

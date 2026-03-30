@@ -58,8 +58,9 @@ execute_step() {
             local client_name=$(echo "$params" | jq -r '.client_name')
             local client_host=$(echo "$params" | jq -r '.client_host')
             local client_port=$(echo "$params" | jq -r '.client_port')
+            local category=$(echo "$params" | jq -r '.category // ""')
             local api_key="${RUNTIME_VARS[$api_key_var]}"
-            add_download_client "$service" "$port" "$api_key" "$client_name" "$client_host" "$client_port"
+            add_download_client "$service" "$port" "$api_key" "$client_name" "$client_host" "$client_port" "$api_key" "$category"
             ;;
 
         add_indexer_to_prowlarr)
