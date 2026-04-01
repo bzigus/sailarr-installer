@@ -52,7 +52,7 @@ The stack includes these services, configured based on your selections:
 - **[Rclone](https://github.com/rclone/rclone)** - Mounts Zurg as local filesystem
 - **[Zilean](https://github.com/iPromKnight/zilean)** - Debrid Media Manager indexer
 - **[PostgreSQL](https://www.postgresql.org/)** - Database for Zilean
-- **[Overseerr](https://overseerr.dev/)** - Media request management
+- **[Seerr](https://seerr.dev/)** - Media request management (supports Plex and Jellyfin)
 - **[Autoscan](https://github.com/saltydk/autoscan)** - Automatic media server library updates
 
 ### Download Client
@@ -118,7 +118,7 @@ After installation, access your services at different URLs depending on your con
 - **Radarr:** `http://SERVER_IP:7878`
 - **Sonarr:** `http://SERVER_IP:8989`
 - **Prowlarr:** `http://SERVER_IP:9696`
-- **Overseerr:** `http://SERVER_IP:5055`
+- **Seerr:** `http://SERVER_IP:5055`
 - **Zilean:** `http://SERVER_IP:8181`
 - **Decypharr:** `http://SERVER_IP:8283`
 - **Tautulli:** `http://SERVER_IP:8282` *(only with Plex)*
@@ -138,7 +138,7 @@ Services are accessible via subdomains of your configured domain:
 - **Radarr:** `https://radarr.YOUR_DOMAIN`
 - **Sonarr:** `https://sonarr.YOUR_DOMAIN`
 - **Prowlarr:** `https://prowlarr.YOUR_DOMAIN`
-- **Overseerr:** `https://overseerr.YOUR_DOMAIN`
+- **Seerr:** `https://seerr.YOUR_DOMAIN`
 - **Zilean:** `https://zilean.YOUR_DOMAIN`
 - **Decypharr:** `https://decypharr.YOUR_DOMAIN`
 - **Tautulli:** `https://tautulli.YOUR_DOMAIN` *(only with Plex)*
@@ -158,7 +158,7 @@ After the automated installation completes, some services require manual configu
 
 **📖 See [docker/POST-INSTALL.md](docker/POST-INSTALL.md) for detailed step-by-step instructions on:**
 
-- **Overseerr Setup** - Connect Plex or Jellyfin account, select libraries, and add Radarr/Sonarr servers
+- **Seerr Setup** - Connect Plex or Jellyfin account, select libraries, and add Radarr/Sonarr servers
 - **Tautulli Setup** - Connect to Plex for analytics and monitoring (Plex installs only)
 - **Additional Configuration** - Optional tweaks and customizations
 
@@ -168,7 +168,7 @@ The automated installer handles 95% of the setup, but these services need your m
 
 The workflow is completely automated:
 
-1. **Request** content through Overseerr
+1. **Request** content through Seerr
 2. **Search** - Radarr/Sonarr search indexers via Prowlarr
 3. **Find** - Zilean provides cached torrents from Debrid Media Manager
 4. **Add** - Decypharr adds torrent to Real-Debrid
@@ -242,7 +242,7 @@ cd /YOUR_INSTALL_DIR
 │   ├── radarr-config/
 │   ├── sonarr-config/
 │   ├── prowlarr-config/
-│   ├── overseerr-config/
+│   ├── seerr-config/
 │   ├── zilean-config/
 │   ├── zurg-config/
 │   ├── autoscan-config/
@@ -467,7 +467,7 @@ This project builds upon the excellent work of many in the community:
 - **[Debrid Media Manager](https://github.com/debridmediamanager/debrid-media-manager)** - Torrent caching platform
 - **[dreulavelle/Prowlarr-Indexers](https://github.com/dreulavelle/Prowlarr-Indexers)** - Custom Prowlarr indexer definitions
 
-And all the developers of the tools in this stack: Plex, Radarr, Sonarr, Prowlarr, Overseerr, Zurg, Rclone, Zilean, Decypharr, RDTClient, Autoscan, Traefik, Watchtower, Tautulli, Homarr, Dashdot, Pinchflat, and Plex-Trakt-Sync.
+And all the developers of the tools in this stack: Plex, Radarr, Sonarr, Prowlarr, Seerr, Zurg, Rclone, Zilean, Decypharr, RDTClient, Autoscan, Traefik, Watchtower, Tautulli, Homarr, Dashdot, Pinchflat, and Plex-Trakt-Sync.
 
 ## License
 
