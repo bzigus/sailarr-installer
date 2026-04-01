@@ -35,7 +35,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.tautulli.rule=Host(`${TAUTULLI_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-      - traefik.http.routers.tautulli.entrypoints=web
+      - traefik.http.routers.tautulli.entrypoints=websecure
+      - traefik.http.routers.tautulli.tls=true
+      - traefik.http.routers.tautulli.tls.certresolver=letsencrypt
       - traefik.http.services.tautulli.loadbalancer.server.port=8181
     depends_on:
       plex:

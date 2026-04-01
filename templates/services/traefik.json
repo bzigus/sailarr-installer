@@ -17,7 +17,7 @@
         "action": "log_success",
         "description": "Display Traefik information",
         "params": {
-          "message": "Traefik is ready!\nDashboard: http://localhost:8080\nHTTP: http://localhost:80\nHTTPS: https://localhost:443"
+          "message": "Traefik is ready!\nDashboard: http://localhost:8080\nHTTP (redirects to HTTPS): http://localhost:80\nHTTPS: https://localhost:443"
         }
       },
       {

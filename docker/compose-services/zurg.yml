@@ -24,7 +24,9 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.zurg.rule=Host(`${ZURG_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-    - traefik.http.routers.zurg.entrypoints=web
+    - traefik.http.routers.zurg.entrypoints=websecure
+    - traefik.http.routers.zurg.tls=true
+    - traefik.http.routers.zurg.tls.certresolver=letsencrypt
     - traefik.http.services.zurg.loadbalancer.server.port=9999
     volumes:
     - ${ROOT_DIR}/config/zurg-config/config.yml:/app/config.yml
