@@ -25,7 +25,9 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.zilean.rule=Host(`${ZILEAN_TRAEFIK_NAME}.${DOMAIN_NAME}`)
-    - traefik.http.routers.zilean.entrypoints=web
+    - traefik.http.routers.zilean.entrypoints=websecure
+    - traefik.http.routers.zilean.tls=true
+    - traefik.http.routers.zilean.tls.certresolver=letsencrypt
     - traefik.http.services.zilean.loadbalancer.server.port=8181
     depends_on:
       zilean-postgres:

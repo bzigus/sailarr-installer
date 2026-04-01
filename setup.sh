@@ -177,6 +177,10 @@ AUTH_PASSWORD=${AUTH_PASSWORD:-}
 # =============================================================================
 TRAEFIK_ENABLED=$TRAEFIK_ENABLED
 
+# Let's Encrypt email for TLS certificate notifications
+# Required when Traefik is enabled for HTTPS
+LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-}
+
 # =============================================================================
 # DNS/DOMAIN CONFIGURATION
 # =============================================================================
@@ -1183,6 +1187,16 @@ If disabled, services will be accessible via their direct ports." \
             "${DOMAIN_NAME:-mediacenter.local}" \
             "false" \
             "USER_DOMAIN"
+
+        # Ask for Let's Encrypt email (required for HTTPS certificates)
+        ask_user_input \
+            "Let's Encrypt Email" \
+            "Email address for Let's Encrypt TLS certificate notifications and account registration.
+Required for HTTPS certificates via Traefik. Use a real email address." \
+            "Enter email for Let's Encrypt certificates: " \
+            "" \
+            "false" \
+            "LETSENCRYPT_EMAIL"
     fi
 
     # Check and auto-fix UID/GID conflicts
@@ -2082,10 +2096,10 @@ echo "Next steps:"
 echo "1. All services are now running! You can access them at:"
 if [ "$TRAEFIK_ENABLED" = true ]; then
     echo "   • Traefik Dashboard: http://${DOMAIN_NAME}:8080"
-    echo "   • Prowlarr:  http://prowlarr.${DOMAIN_NAME}  (already configured!)"
-    echo "   • Radarr:    http://radarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Sonarr:    http://sonarr.${DOMAIN_NAME}    (already configured!)"
-    echo "   • Seerr:    http://seerr.${DOMAIN_NAME}"
+    echo "   • Prowlarr:  https://prowlarr.${DOMAIN_NAME}  (already configured!)"
+    echo "   • Radarr:    https://radarr.${DOMAIN_NAME}    (already configured!)"
+    echo "   • Sonarr:    https://sonarr.${DOMAIN_NAME}    (already configured!)"
+    echo "   • Seerr:    https://seerr.${DOMAIN_NAME}"
     if [ "${MEDIA_SERVER:-plex}" = "plex" ]; then
         echo "   • Plex:      http://${DOMAIN_NAME}:32400/web"
     elif [ "${MEDIA_SERVER:-plex}" = "jellyfin" ]; then

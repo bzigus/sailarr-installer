@@ -29,7 +29,9 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.decypharr.rule=Host(`decypharr.${DOMAIN_NAME}`)
-    - traefik.http.routers.decypharr.entrypoints=web
+    - traefik.http.routers.decypharr.entrypoints=websecure
+    - traefik.http.routers.decypharr.tls=true
+    - traefik.http.routers.decypharr.tls.certresolver=letsencrypt
     - traefik.http.services.decypharr.loadbalancer.server.port=8283
     volumes:
     # Config directory
